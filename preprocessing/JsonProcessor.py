@@ -14,4 +14,4 @@ class JsonProcessor:
         raise ValueError("sortby should be a list indicating column keys: [\"col1\", \"col2\", ...]")
 
     def json_save(self, sorteddata, savepath):
-        sorteddata.to_json(savepath)
+        sorteddata.to_json(savepath, force_ascii=False)
