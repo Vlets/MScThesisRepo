@@ -1,12 +1,13 @@
-from preprocessing.JsonProcessing import JsonProcessing
+from preprocessing.JsonProcessor import JsonProcessor
 
-iWantToSort = JsonProcessing()
+jsonTools = JsonProcessor()
 
-# Insert your Json file path
 filePath = "/Users/george/Expendable/sample.json"
 
-data = iWantToSort.json_read(filePath)
-sortedData = iWantToSort.json_sort(data)
+sortBy = ["visitorId", "timestamp"]
+
+data = jsonTools.json_read(filePath)
+sortedData = jsonTools.json_sort(data, sortBy)
 
 # Save to Json
-iWantToSort.json_save(sortedData, "./testProduced.json")
+jsonTools.json_save(sortedData, "./testProduced.json")
