@@ -199,44 +199,7 @@ hs_err_pid*
 
 # End of https://www.gitignore.io/api/git,java,eclipse,intellij,jetbrains
 
-
-Abel_Elias/\.idea/
-
-Jordy_Dennis/env
-Jordy_Dennis/__pycache__
-Jordy_Dennis/LexParser
-Jordy_Dennis/*.pyc
-Jordy_Dennis/AST/__pycache__
-Jordy_Dennis/GUI/__pycache__
-
-remihasan/.idea/
-Ioana_Hisham/.idea/
-*.iml
-
-Arjan_Niels/SharpQL/.vs/
-Arjan_Niels/SharpQL/packages/
-Arjan_Niels/SharpQL/QLParser/obj/Debug/
-Arjan_Niels/SharpQL/QLVizualizer/obj/Debug/
-Arjan_Niels/SharpQL/\.vs/
-Arjan_Niels/SharpQL/QLParser/obj/Debug/
-Arjan_Niels/SharpQL/packages/Antlr\.3\.5\.0\.2/
-Arjan_Niels/SharpQL/packages/
-Arjan_Niels/SharpQL/QLParserTester/obj/Debug/
-Arjan_Niels/SharpQL/QLParser\.Tests/obj/Debug/
-Arjan_Niels/SharpQL/QLVisualizer\.Tests/obj/Debug/
-
-PyQuest/.idea/
-
-Remi_Hasan/gen/
-Remi_Hasan/target/
-*.bat
-
-.vs
-
-GunOli/src/main/autoGen/
-ForcePush/.idea/workspace.xml
-ForcePush/.idea/misc.xml
-
+*.json
 .DS_Store
 *.xml
 .idea/workspace.xml
