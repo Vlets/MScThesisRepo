@@ -202,5 +202,5 @@ hs_err_pid*
 *.json
 .DS_Store
 *.xml
-.idea/workspace.xml
+.idea/*.xml
 *.xml
