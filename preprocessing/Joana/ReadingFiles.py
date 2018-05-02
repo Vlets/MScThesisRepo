@@ -24,10 +24,14 @@ class ReadingFiles:
 
         while (index < len(query)):
             j = query.get_value(index, column)
-            my_json = j.decode('utf8').replace("'", '"')
+            my_json = j.decode('utf8')
             data = json.loads(my_json)
             data_json.append(data)
             index += 1
 
+        print("DONE 1")
+
         with open(path_file, 'w') as outfile:
             json.dump(data_json, outfile)
+
+        print("DONE 2")
