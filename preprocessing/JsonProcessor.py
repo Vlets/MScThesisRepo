@@ -4,8 +4,8 @@ import pandas as pd
 class JsonProcessor:
 
     def json_read(self, filepath):
-        self.file = pd.read_json(filepath, lines=True, convert_dates=False)
-        return self.file
+        file = pd.read_json(filepath, lines=False, convert_dates=False)
+        return file
 
     def json_sort(self, file, sortby):
         if isinstance(sortby, list):
@@ -13,5 +13,8 @@ class JsonProcessor:
             return sortedfile
         raise ValueError("sortby should be a list indicating column keys: [\"col1\", \"col2\", ...]")
 
-    def json_save(self, sorteddata, savepath):
-        sorteddata.to_json(savepath, force_ascii=False)
+    def json_save(self, sorteddata, savepath, toJson = True):
+        if toJson:
+            sorteddata.to_json(savepath + ".json", force_ascii=False)
+        if not toJson:
+            sorteddata.to_csv(savepath + ".csv")

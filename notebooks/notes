@@ -2,3 +2,14 @@
 # path = "/Users/george/Expendable/gaming.json"
 # path2 = "/Users/george/Expendable/sampleSmall.json"
 # path3 = "/Users/george/Expendable/sample.json"
+
+
+import json
+
+class JsonProcessor:
+
+    def json_read(self, filepath):
+        with open(filepath) as f:
+            for line in f:
+                j_content = json.loads(line)
+        return j_content
