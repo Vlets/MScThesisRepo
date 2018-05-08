@@ -1,5 +1,4 @@
 from preprocessing.Joana.ReadingFiles import ReadingFiles as rf
-import pandas as pd
 
 uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
 
