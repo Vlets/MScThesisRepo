@@ -3,8 +3,8 @@ import pandas as pd
 
 class JsonProcessor:
 
-    def json_read(self, filepath):
-        file = pd.read_json(filepath, lines=False, convert_dates=False)
+    def json_read(self, filepath, multiline=False):
+        file = pd.read_json(filepath, lines=multiline, convert_dates=False)
         return file
 
     def json_sort(self, file, sortby):

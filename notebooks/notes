@@ -13,3 +13,11 @@ class JsonProcessor:
             for line in f:
                 j_content = json.loads(line)
         return j_content
+
+
+
+        # km = KPrototypes(n_clusters=4, init='Cao', verbose=16)
+
+# clusters = km.fit_predict(sortedData, categorical=categoricalData)
+
+# print(km.cluster_centroids_)
