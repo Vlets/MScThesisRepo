@@ -39,7 +39,6 @@ class MFAlgorithm:
 
             i += 1
 
-        if string != "":
-            result.append(string)
+        result.append(string)
 
         return result

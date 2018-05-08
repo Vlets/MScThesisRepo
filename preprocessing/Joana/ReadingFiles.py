@@ -32,6 +32,6 @@ class ReadingFiles:
         print("DONE 1")
 
         with open(path_file, 'w') as outfile:
-            json.dump(data_json, outfile)
+            json.dump(data_json, outfile, indent=0)
 
         print("DONE 2")
