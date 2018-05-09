@@ -9,7 +9,7 @@ test = mfa.run_MF_algorithm(['A', 'B', 'C', 'D', 'C', 'B', 'E', 'G', 'H', 'G', '
 #Test the algorithm with actual data
 jsonTools = JsonProcessor()
 
-dataFrame = jsonTools.json_read("/Users/Joana/Documents/scikitLiterallyLearn/preprocessing/Joana/test2.json")
+dataFrame = jsonTools.json_read("/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test2.json")
 
 sortBy = ["visitorId", "timestamp"]
 sortedData = jsonTools.json_sort(dataFrame, sortBy)
@@ -21,7 +21,7 @@ paths = []
 for visitor in visitors:
     path = []
     dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-    urls = dataResult.pageUrl.unique()
+    urls = dataResult.pageUrl
     for url in urls:
         path.append(url)
     paths.append((visitor, path))
