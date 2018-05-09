@@ -18,14 +18,16 @@ class MFAlgorithm:
 
             if varA == '':
                 if string != []:
-                    result.append(string)
+                    if string not in result:
+                        result.append(string)
                 string.append(varB)
                 i += 1
                 continue
 
             if varB in string:
                 if flag == 1:
-                    result.append(string)
+                    if string not in result:
+                        result.append(string)
                 index = string.index(varB)
                 string = string[0:index + 1]
                 flag = 0
@@ -39,7 +41,8 @@ class MFAlgorithm:
 
             i += 1
 
-        result.append(string)
+        if string not in result:
+            result.append(string)
 
         return result
 
