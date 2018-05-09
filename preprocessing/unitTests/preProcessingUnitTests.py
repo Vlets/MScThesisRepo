@@ -31,13 +31,19 @@ class UnitTests(unittest.TestCase):
     def test_MFA_random_timestamp_data(self):
         processedData = self.process_data(self.badData)
         result = mfa.init_algorithm(processedData)
-        expectedResult = [('1aUserOne',
+        expectedResult = [('Annie',
                            [['mock.com/home', 'mock.com/home/afterhome'],
                             ['mock.com/home',
-                             'mock.com/home/thisshouldbealone',
+                             'mock.com/home/thispageisdifferent',
                              'mock.com/home/afterhome/afterafterhome']]),
-                          ('2bUserTwo', [['mock.com/home', 'mock.com/home/afterhome']]),
-                          ('3cUserThree',
+                          ('Smooth Criminal',
+                           [['mock.com/home/afterhome/afterafterhome',
+                             'mock.com/home',
+                             'mock.com/home/thispageisdifferent/iswear']]),
+                          ("You've been hit", [['mock.com/home', 'mock.com/home/afterhome']]),
+                          ('are_you', [['mock.com/home', 'mock.com/home/afterhome']]),
+                          ('by a', [['mock.com/home', 'mock.com/home/thispageisdifferent']]),
+                          ('ok?',
                            [['mock.com/home/afterhome/afterafterhome',
                              'mock.com/home',
                              'mock.com/home/thisshouldbealone']])]

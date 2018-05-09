@@ -5,7 +5,7 @@ from preprocessing.helpers.JsonProcessor import JsonProcessor
 
 
 dataFrameMock = pd.DataFrame(dataFiles.mockData)
-dataFrameMock2 = pd.DataFrame(dataFiles.mockDataReordered)
+dataFrameMock2 = pd.DataFrame(dataFiles.mockData2)
 
 jsonTools = JsonProcessor()
 #dataFrame = jsonTools.json_read("/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test2.json")
