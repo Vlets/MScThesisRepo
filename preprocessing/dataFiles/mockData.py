@@ -1,0 +1,32 @@
+mockData = [{'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home', 'timestamp': 1},
+            {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': 10},
+            {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': 100},
+            {'visitorId': '2bUserTwo', 'pageUrl': 'mock.com/home', 'timestamp': 32},
+            {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home', 'timestamp': 1000},
+            {'visitorId': '2bUserTwo', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': 67},
+            {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': 10000},
+            {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': 8932},
+            {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home', 'timestamp': 23323},
+            {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': 324142}]
+
+mockData2 = [{'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home', 'timestamp': 1},
+             {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': 10},
+             {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': 100000},
+             {'visitorId': '2bUserTwo', 'pageUrl': 'mock.com/home', 'timestamp': 32},
+             {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home', 'timestamp': 1000},
+             {'visitorId': '2bUserTwo', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': 67},
+             {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': 10000},
+             {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': 8932},
+             {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home', 'timestamp': 23323},
+             {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': 324142}]
+
+mockDataReordered = [{'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home', 'timestamp': 1},
+                     {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home/afterhome/afterafterhome','timestamp': 8932},
+                     {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home', 'timestamp': 23323},
+                     {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': 10},
+                     {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': 100},
+                     {'visitorId': '2bUserTwo', 'pageUrl': 'mock.com/home', 'timestamp': 32},
+                     {'visitorId': '1aUserOne',   'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': 10000},
+                     {'visitorId': '1aUserOne', 'pageUrl': 'mock.com/home', 'timestamp': 1000},
+                     {'visitorId': '2bUserTwo', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': 67},
+                     {'visitorId': '3cUserThree', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': 324142}]

@@ -1,8 +1,5 @@
-from preprocessing.JsonProcessor import JsonProcessor
-import pandas as pd
-import numpy as np
-from kmodes.kprototypes import KPrototypes
-from pandas.io.json import json_normalize
+from preprocessing.helpers.JsonProcessor import JsonProcessor
+import preprocessing.dataFiles.mockData as dataFiles
 
 jsonTools = JsonProcessor()
 
@@ -17,6 +14,6 @@ sortedData = jsonTools.json_sort(data, sortBy)
 
 
 # Save to Json/CSV. If you don't want to specify a path, simply put the filename.
-jsonTools.json_save(sortedData, "./testProduced", toJson=False)
+jsonTools.json_save(sortedData, "./dataFiles/testProduced", toJson=False)
 
 

@@ -1,34 +1,19 @@
 import pandas as pd
-import numpy as np
-
+import preprocessing.dataFiles.mockData as dataFiles
 from preprocessing.Joana.MFAlgorithm import MFAlgorithm as mfa
-from preprocessing.JsonProcessor import JsonProcessor
+from preprocessing.helpers.JsonProcessor import JsonProcessor
 
-test = mfa.run_MF_algorithm(['A', 'B', 'C', 'D', 'C', 'B', 'E', 'G', 'H', 'G', 'W', 'A', 'O', 'U', 'O', 'V'])
 
-mockData = [{'visitorId': '1', 'pageUrl': 'mock.com/home', 'timestamp': '1'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': '3'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': '5'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home', 'timestamp': '7'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': '9'},
-            {'visitorId': '2', 'pageUrl': 'mock.com/home', 'timestamp': '1'},
-            {'visitorId': '2', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': '3'},
-            {'visitorId': '3', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': '5'},
-            {'visitorId': '3', 'pageUrl': 'mock.com/home', 'timestamp': '7'},
-            {'visitorId': '3', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': '9'}]
-
-dataFrameMock = pd.DataFrame(mockData)
+dataFrameMock = pd.DataFrame(dataFiles.mockData)
+dataFrameMock2 = pd.DataFrame(dataFiles.mockDataReordered)
 
 jsonTools = JsonProcessor()
 #dataFrame = jsonTools.json_read("/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test2.json")
-dataFrame2 = jsonTools.json_read("/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/testProduced.json")
 
 sortBy = ["visitorId", "timestamp"]
-sortedData = jsonTools.json_sort(dataFrame2, sortBy)
-mockSortedData = jsonTools.json_sort(dataFrameMock, sortBy)
+sortedData = jsonTools.json_sort(dataFrameMock, sortBy)
+sortedData2 = jsonTools.json_sort(dataFrameMock2, sortBy)
 
-mockResult = mfa.init_algorithm(mockSortedData)
-result = mfa.init_algorithm(sortedData)
-
+mockResult = mfa.init_algorithm(sortedData)
 
 
