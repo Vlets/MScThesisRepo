@@ -21,3 +21,16 @@ class JsonProcessor:
 # clusters = km.fit_predict(sortedData, categorical=categoricalData)
 
 # print(km.cluster_centroids_)
+
+mockData = [{'visitorId': '1', 'pageUrl': 'mock.com/home', 'timestamp': '1'},
+            {'visitorId': '1', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': '3'},
+            {'visitorId': '1', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': '5'},
+            {'visitorId': '1', 'pageUrl': 'mock.com/home', 'timestamp': '7'},
+            {'visitorId': '1', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': '9'},
+            {'visitorId': '2', 'pageUrl': 'mock.com/home', 'timestamp': '1'},
+            {'visitorId': '2', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': '3'},
+            {'visitorId': '3', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': '5'},
+            {'visitorId': '3', 'pageUrl': 'mock.com/home', 'timestamp': '7'},
+            {'visitorId': '3', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': '9'}]
+
+            mockDataFrame = pd.DataFrame(mockData)
