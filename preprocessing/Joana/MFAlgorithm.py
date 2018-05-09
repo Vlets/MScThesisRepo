@@ -9,7 +9,7 @@ class MFAlgorithm:
             i += 1
 
         i = 0
-        string = ""
+        string = []
         flag = 1
         result = []
 
@@ -17,9 +17,9 @@ class MFAlgorithm:
             varA, varB = tuples[i]
 
             if varA == '':
-                if string != "":
+                if string != []:
                     result.append(string)
-                string = varB
+                string.append(varB)
                 i += 1
                 continue
 
@@ -33,7 +33,7 @@ class MFAlgorithm:
                 continue
 
             else:
-                string += varB
+                string.append(varB)
                 if flag == 0:
                     flag = 1
 
@@ -41,4 +41,25 @@ class MFAlgorithm:
 
         result.append(string)
 
+        return result
+
+    @staticmethod
+    def init_algorithm(sortedData):
+        visitors = sortedData.visitorId.unique()
+        paths = []
+
+        for visitor in visitors:
+            path = []
+            dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
+            urls = dataResult.pageUrl
+            for url in urls:
+                path.append(url)
+            paths.append((visitor, path))
+
+        result = []
+
+        for elem in paths:
+            visitor, path = elem
+            resultPaths = MFAlgorithm.run_MF_algorithm(path)
+            result.append((visitor, resultPaths))
         return result
