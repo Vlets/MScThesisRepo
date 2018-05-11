@@ -8,11 +8,11 @@ class JsonProcessor:
         file = pd.read_json(filepath, lines=multiline, convert_dates=False)
         return file
 
-    def json_sort(self, file, sortby):
-        if isinstance(sortby, list):
-            sortedfile = file.sort_values(by=sortby)
-            return sortedfile
-        raise ValueError("sortby should be a list indicating column keys: [\"col1\", \"col2\", ...]")
+    def json_sort(self, file, sort_by):
+        if isinstance(sort_by, list):
+            sorted_file = file.sort_values(by=sort_by)
+            return sorted_file
+        raise ValueError("sort_by should be a list indicating column keys: [\"col1\", \"col2\", ...]")
 
     def json_save(self, sorted_data, savepath, to_json=True):
         if to_json:
