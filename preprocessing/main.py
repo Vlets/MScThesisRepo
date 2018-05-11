@@ -10,29 +10,12 @@ jsonTools = JsonProcessor()
 filePath = "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/test2.json"
 sortBy = ["visitorId", "timestamp"]
 
-###### Start timing method 1
-start = time.time()
-
-with open(filePath) as f:
-    file = json.load(f)
-    normalisedFile = json_normalize(file)
-
-sortedData1 = jsonTools.json_sort(normalisedFile, sortBy)
-end = time.time()
-print(end - start, "Seconds")
-###### Stop timing method 1
-
-###### Start timing method 2
-start = time.time()
-
 data = jsonTools.json_read(filePath)
 # TODO: normalise other columns too
 collectorData = json_normalize(data['collectorData'])
-allData = pd.concat([collectorData, data])
+fusedData = pd.concat([collectorData, data], axis=1)
+allData = fusedData.drop(['collectorData'], axis=1)
 sortedData = jsonTools.json_sort(allData, sortBy)
-
-end = time.time()
-print(end - start, "Seconds")
 
 
 # Save to Json/CSV. If you don't want to specify a path, simply put the filename.
