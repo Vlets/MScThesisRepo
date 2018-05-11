@@ -35,4 +35,6 @@ mockData = [{'visitorId': '1', 'pageUrl': 'mock.com/home', 'timestamp': '1'},
 
 mockDataFrame = pd.DataFrame(mockData)
 
+#categoricalData = ["audience", "visitorId", "channel", "url", "geo", "newVisit"]
+
 #To take out pageUrl's that end with '.png' or '.jpeg' --> sortedData[~sortedData['pageUrl'].str.endswith('.png')]
