@@ -26,6 +26,7 @@ print(end - start, "Seconds")
 start = time.time()
 
 data = jsonTools.json_read(filePath)
+# TODO: normalise other columns too
 collectorData = json_normalize(data['collectorData'])
 allData = pd.concat([collectorData, data])
 sortedData = jsonTools.json_sort(allData, sortBy)
