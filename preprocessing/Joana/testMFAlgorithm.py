@@ -8,7 +8,7 @@ dataFrameMock = pd.DataFrame(dataFiles.mockData)
 dataFrameMock2 = pd.DataFrame(dataFiles.mockData2)
 
 jsonTools = JsonProcessor()
-#dataFrame = jsonTools.json_read("/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test2.json")
+#dataFrame = jsonTools.json_read("./test2.json")
 
 sortBy = ["visitorId", "timestamp"]
 sortedData = jsonTools.json_sort(dataFrameMock, sortBy)
