@@ -37,4 +37,10 @@ mockDataFrame = pd.DataFrame(mockData)
 
 #categoricalData = ["audience", "visitorId", "channel", "url", "geo", "newVisit"]
 
+with open(filePath) as f:
+    file = json.load(f)
+    normalisedFile = json_normalize(file)
+
+sortedData1 = jsonTools.json_sort(normalisedFile, sortBy)
+
 #To take out pageUrl's that end with '.png' or '.jpeg' --> sortedData[~sortedData['pageUrl'].str.endswith('.png')]
