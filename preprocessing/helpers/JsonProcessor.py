@@ -14,12 +14,6 @@ class JsonProcessor:
             return sorted_file
         raise ValueError("sort_by should be a list indicating column keys: [\"col1\", \"col2\", ...]")
 
-    def json_save(self, sorted_data, savepath, to_json=True):
-        if to_json:
-            sorted_data.to_json(savepath + ".json", force_ascii=False)
-        if not to_json:
-            sorted_data.to_csv(savepath + ".csv")
-
     def normalize_collectors(self, data_frame):
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
@@ -32,3 +26,9 @@ class JsonProcessor:
         processed_data = self.normalize_collectors(data_frame)
         sorted_data = self.json_sort(processed_data, sort_by)
         return sorted_data
+
+    def json_save(self, sorted_data, savepath, to_json=True):
+        if to_json:
+            sorted_data.to_json(savepath + ".json", force_ascii=False)
+        if not to_json:
+            sorted_data.to_csv(savepath + ".csv")
