@@ -1,4 +1,4 @@
-from preprocessing.Joana.ReadingFiles import ReadingFiles as rf
+from preprocessing.dataAlgorithms.ReadingFiles import ReadingFiles as rf
 
 uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
 
