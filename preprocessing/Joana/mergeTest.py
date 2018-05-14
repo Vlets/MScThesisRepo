@@ -14,3 +14,5 @@ sortedData = jsonTools.json_sort(dataFrameMock2, ['visitorId', 'timestamp'])
 mockResult = mfa.init_algorithm(sortedData)
 
 df = pd.DataFrame(mockResult, columns=['visitorId', 'transaction'])
+
+#res = pd.DataFrame(lst[0], columns=['timestamp', 'path'])
