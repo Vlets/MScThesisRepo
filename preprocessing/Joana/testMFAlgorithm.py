@@ -14,6 +14,6 @@ sortBy = ["visitorId", "timestamp"]
 sortedData = jsonTools.json_sort(dataFrameMock, sortBy)
 sortedData2 = jsonTools.json_sort(dataFrameMock2, sortBy)
 
-mockResult = mfa.init_algorithm(sortedData)
+mockResult = mfa.init_algorithm(sortedData2)
 
 
