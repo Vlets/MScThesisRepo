@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 import preprocessing.dataFiles.mockData as dataFiles
-from preprocessing.Joana.MFAlgorithm import MFAlgorithm as mfa
+from preprocessing.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 from preprocessing.helpers.JsonProcessor import JsonProcessor
 
 
