@@ -31,7 +31,11 @@ class ReadingFiles:
 
         print("DONE 1")
 
-        with open(path_file, 'w') as outfile:
-            json.dump(data_json, outfile, indent=0)
+        if path_file != "":
+            with open(path_file, 'w') as outfile:
+                json.dump(data_json, outfile, indent=0)
 
-        print("DONE 2")
+            print("DONE 2")
+
+        else:
+            return data_json
