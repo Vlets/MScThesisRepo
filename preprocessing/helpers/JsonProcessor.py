@@ -20,7 +20,7 @@ class JsonProcessor:
         droplist = ['collectorData', 'channel', 'dayofweek', 'doccreatedby.terms', 'doctype.terms'
                     , 'journeyphase.terms', 'pardot.collectorId', 'pardot.lists', 'pardot.visitorId'
                     , 'referrer.terms', 'data', 'mountId', 'pageId', 'pathInfo', 'remoteAddr'
-                    , 'visitId']
+                    , 'visitId', 'experimentSelectedVariantList']
         processed_data = all_data.drop(droplist, axis=1)
         return processed_data
 
