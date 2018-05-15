@@ -1,7 +1,7 @@
 class MFAlgorithm:
 
     @staticmethod
-    def run_MF_algorithm(path, time):
+    def run_MF_algorithm(visitor, time, path):
         tuples = [('', path[0], 0, 0)]
         i = 0
         while (i + 1) < len(path):
@@ -20,7 +20,7 @@ class MFAlgorithm:
             if varA == '':
                 if string != []:
                     if string not in result:
-                        result.append((timestamp, string))
+                        result.append((visitor, timestamp, string))
                 string.append(varB)
                 timestamp = time[indexB]
                 i += 1
@@ -29,7 +29,7 @@ class MFAlgorithm:
             if varB in string:
                 if flag == 1:
                     if string not in result:
-                        result.append((timestamp, string))
+                        result.append((visitor, timestamp, string))
                 index = string.index(varB)
                 string = string[0:index + 1]
                 flag = 0
@@ -46,7 +46,7 @@ class MFAlgorithm:
             i += 1
 
         if string not in result:
-            result.append((timestamp, string))
+            result.append((visitor, timestamp, string))
 
         return result
 
@@ -56,19 +56,17 @@ class MFAlgorithm:
         paths = []
 
         for visitor in visitors:
-            path = []
             dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-            urls = dataResult.pageUrl
+            path = dataResult.pageUrl.tolist()
             timestamps = dataResult.timestamp.get_values()
-            for url in urls:
-                path.append(url)
             paths.append((visitor, timestamps, path))
 
         result = []
 
         for elem in paths:
             visitor, time, path = elem
-            resultPaths = MFAlgorithm.run_MF_algorithm(path, time)
-            result.append((visitor, resultPaths))
+            resultPaths = MFAlgorithm.run_MF_algorithm(visitor, time, path)
+            result.extend(resultPaths)
+
         return result
 

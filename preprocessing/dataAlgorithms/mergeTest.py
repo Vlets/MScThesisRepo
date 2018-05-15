@@ -2,22 +2,15 @@ import pandas as pd
 import preprocessing.dataFiles.mockData as dataFiles
 from preprocessing.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 from preprocessing.helpers.JsonProcessor import JsonProcessor
-import time
-
-dataFrameMock = pd.DataFrame(dataFiles.mockData)
-dataFrameMock2 = pd.DataFrame(dataFiles.mockData2)
 
 jsonTools = JsonProcessor()
 
-sortedData = jsonTools.json_sort(dataFrameMock2, ['visitorId', 'timestamp'])
+path = "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/test2.json"
 
-mockResult = mfa.init_algorithm(sortedData)
+jsonTools = JsonProcessor()
 
-df = pd.DataFrame(mockResult, columns=['visitorId', 'transaction'])
+trueData = jsonTools.do_it_all(path)
 
-lst = df['transaction'].tolist()
-tlist = pd.DataFrame(lst[0], columns=['timestamp', 'path'])
+mockResult = mfa.init_algorithm(trueData)
 
-for x in range(1, len(lst)):
-    temp = pd.DataFrame(lst[x], columns=['timestamp', 'path'])
-    tlist = pd.concat([tlist, temp], join='outer', axis=0)
+df = pd.DataFrame(mockResult, columns=['visitorId', 'timestamp', 'path'])
