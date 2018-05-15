@@ -15,7 +15,7 @@ dataFrame = jsonTools.json_read(path)
 dataFrame = jsonTools.normalize_collectors(dataFrame)
 
 # normal data
-sortedData = jsonTools.do_it_all(path)
+sortedData = jsonTools.read_and_sort_data(path)
 
 start = time.time()
 mockResult = mfa.init_algorithm(sortedData)

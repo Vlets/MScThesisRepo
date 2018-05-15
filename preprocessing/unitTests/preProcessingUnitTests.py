@@ -64,7 +64,7 @@ class UnitTests(unittest.TestCase):
     # Checks if the length of the resulting list is the same as the number
     # of unique visitorIds in the initial dataFrame.
     def test_did_we_miss_visitors(self):
-        sortedData = self.jsonTools.do_it_all(
+        sortedData = self.jsonTools.read_and_sort_data(
             "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/test2.json")
         mockResult = mfa.init_algorithm(sortedData)
         self.assertTrue(len(mockResult) == sortedData['visitorId'].nunique())

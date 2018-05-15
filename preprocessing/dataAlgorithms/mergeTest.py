@@ -9,8 +9,12 @@ path = "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFil
 
 jsonTools = JsonProcessor()
 
-trueData = jsonTools.do_it_all(path)
+trueData = jsonTools.read_and_sort_data(path)
 
 mockResult = mfa.init_algorithm(trueData)
 
-df = pd.DataFrame(mockResult, columns=['visitorId', 'timestamp', 'path'])
+df = pd.DataFrame(mockResult, columns=['visitorId', 'timestamp', 'transactionPath'])
+
+finalDataFrame = pd.merge(df, trueData, on=['visitorId', 'timestamp'])
+
+finalDataFrame = finalDataFrame.drop(['timestamp', 'pageUrl'], axis=1)

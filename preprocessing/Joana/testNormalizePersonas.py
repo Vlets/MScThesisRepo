@@ -3,7 +3,7 @@ from preprocessing.Joana.NormalizePersona import NormalizePersona
 
 json_Tools = JsonProcessor()
 
-sortedData = json_Tools.do_it_all("./test2.json")
+sortedData = json_Tools.read_and_sort_data("./test2.json")
 sortedData = sortedData.reset_index().drop('index', axis=1)
 
 

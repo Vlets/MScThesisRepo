@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas.io.json import json_normalize
-
+from preprocessing.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 
 class JsonProcessor:
 
@@ -24,12 +24,19 @@ class JsonProcessor:
         processed_data = all_data.drop(droplist, axis=1)
         return processed_data
 
-    def do_it_all(self, file_path):
+    def read_and_sort_data(self, file_path):
         sort_by = ["visitorId", "timestamp"]
         data_frame = self.json_read(file_path)
         processed_data = self.normalize_collectors(data_frame)
         sorted_data = self.json_sort(processed_data, sort_by)
         return sorted_data.reset_index(drop=True)
+
+    def do_it_all(self, file_path):
+        sorted_data = self.read_and_sort_data(file_path)
+        transactions = mfa.init_algorithm(sorted_data)
+        transaction_dataframe = pd.DataFrame(transactions, columns=['visitorId', 'timestamp', 'transactionPath'])
+        final_data_frame = pd.merge(transaction_dataframe, sorted_data, on=['visitorId', 'timestamp'])
+        return final_data_frame.drop(['timestamp', 'pageUrl'], axis=1)
 
     def json_save(self, sorted_data, savepath, to_json=True):
         if to_json:
