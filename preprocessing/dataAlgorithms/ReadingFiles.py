@@ -23,7 +23,7 @@ class ReadingFiles:
         data_json = []
 
         while (index < len(query)):
-            j = query.get_value(index, column)
+            j = query.at[index, column]
             my_json = j.decode('utf8')
             data = json.loads(my_json)
             data_json.append(data)
