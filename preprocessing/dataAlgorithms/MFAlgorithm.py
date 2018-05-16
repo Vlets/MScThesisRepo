@@ -4,7 +4,8 @@ class MFAlgorithm:
     def run_MF_algorithm(visitor, time, path):
         tuples = [('', path[0], 0, 0)]
         i = 0
-        while (i + 1) < len(path):
+        path_size = len(path)
+        while (i + 1) < path_size:
             tuples.append((path[i], path[i + 1], i, i+1))
             i += 1
 
@@ -13,12 +14,13 @@ class MFAlgorithm:
         flag = 1
         result = []
         timestamp = time[0]
+        tuples_size = len(tuples)
 
-        while i < len(tuples):
+        while i < tuples_size:
             varA, varB, indexA, indexB = tuples[i]
 
             if varA == '':
-                if string != []:
+                if string:
                     if string not in result:
                         result.append((visitor, timestamp, string))
                 string.append(varB)

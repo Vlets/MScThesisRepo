@@ -5,7 +5,7 @@ uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
 reading_files = rf()
 reading_files.connect_to_database(uri)
 
-query = 'SELECT entry FROM requestlog LIMIT 1950000'
+query = 'SELECT entry FROM requestlog LIMIT 1000000'
 #query2 = 'SELECT visitorData FROM visitors LIMIT 10'
 #query = 'SELECT entry FROM requestlog ORDER BY requestTime DESC LIMIT 1;'
 
