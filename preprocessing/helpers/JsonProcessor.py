@@ -6,11 +6,13 @@ class JsonProcessor:
 
     def json_read(self, filepath, multiline=False):
         file = pd.read_json(filepath, lines=multiline, convert_dates=False)
+        print("Reading done")
         return file
 
     def json_sort(self, file, sort_by):
         if isinstance(sort_by, list):
             sorted_file = file.sort_values(by=sort_by)
+            print("Sorting done")
             return sorted_file
         raise ValueError("sort_by should be a list indicating column keys: [\"col1\", \"col2\", ...]")
 
@@ -22,6 +24,7 @@ class JsonProcessor:
                     , 'referrer.terms', 'data', 'mountId', 'pageId', 'pathInfo', 'remoteAddr'
                     , 'visitId', 'experimentSelectedVariantList']
         processed_data = all_data.drop(droplist, axis=1)
+        print("Normalising done")
         return processed_data
 
     def read_and_sort_data(self, file_path):
@@ -36,6 +39,7 @@ class JsonProcessor:
         transactions = mfa.init_algorithm(sorted_data)
         transaction_dataframe = pd.DataFrame(transactions, columns=['visitorId', 'timestamp', 'transactionPath'])
         final_data_frame = pd.merge(transaction_dataframe, sorted_data, on=['visitorId', 'timestamp'])
+        print("Finished")
         return final_data_frame.drop(['timestamp', 'pageUrl'], axis=1)
 
     def json_save(self, sorted_data, savepath, to_json=True):
