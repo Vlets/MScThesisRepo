@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-
 class MFAlgorithm:
 
     @staticmethod
@@ -67,7 +66,7 @@ class MFAlgorithm:
             paths.append((visitor, timestamps, path))
             sortedData = sortedData.iloc[len(dataResult):]
             i += 1
-            print(i, "/", visitor_length, " done")
+            print("Progress:", round((i/visitor_length)*100, 2), "%")
         result = []
 
         print("Initializing Algorithm...")
@@ -76,3 +75,4 @@ class MFAlgorithm:
             resultPaths = MFAlgorithm.run_MF_algorithm(visitor, time, path)
             result.extend(resultPaths)
         return result
+

@@ -19,6 +19,7 @@ class JsonProcessor:
     def normalize_collectors(self, data_frame):
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
+        # TODO: Replace with columns to keep
         droplist = ['collectorData', 'channel', 'dayofweek', 'doccreatedby.terms', 'doctype.terms'
                     , 'journeyphase.terms', 'pardot.collectorId', 'pardot.lists', 'pardot.visitorId'
                     , 'referrer.terms', 'data', 'mountId', 'pageId', 'pathInfo', 'remoteAddr'

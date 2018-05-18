@@ -17,41 +17,41 @@ class UnitTests(unittest.TestCase):
         processed_data = self.process_data(self.goodData)
         result = mfa.init_algorithm(processed_data)
         expected_result = [('1aUserOne',
-                           1,
-                           ['mock.com/home',
-                            'mock.com/home/afterhome',
-                            'mock.com/home/afterhome/afterafterhome']),
-                          ('1aUserOne', 1000, ['mock.com/home', 'mock.com/home/thisshouldbealone']),
-                          ('2bUserTwo', 32, ['mock.com/home', 'mock.com/home/afterhome']),
-                          ('3cUserThree',
-                           8932,
-                           ['mock.com/home/afterhome/afterafterhome',
-                            'mock.com/home',
-                            'mock.com/home/thisshouldbealone'])]
+                            1,
+                            ['mock.com/home',
+                             'mock.com/home/afterhome',
+                             'mock.com/home/afterhome/afterafterhome']),
+                           ('1aUserOne', 1000, ['mock.com/home', 'mock.com/home/thisshouldbealone']),
+                           ('2bUserTwo', 32, ['mock.com/home', 'mock.com/home/afterhome']),
+                           ('3cUserThree',
+                            8932,
+                            ['mock.com/home/afterhome/afterafterhome',
+                             'mock.com/home',
+                             'mock.com/home/thisshouldbealone'])]
         self.assertEqual(result, expected_result)
 
     def test_MFA_random_timestamp_data(self):
         processed_data = self.process_data(self.badData)
         result = mfa.init_algorithm(processed_data)
         expected_result = [('Annie', 1, ['mock.com/home', 'mock.com/home/afterhome']),
-                          ('Annie',
-                           1000,
-                           ['mock.com/home',
-                            'mock.com/home/thispageisdifferent',
-                            'mock.com/home/afterhome/afterafterhome']),
-                          ('Smooth Criminal',
-                           89323,
-                           ['mock.com/home/afterhome/afterafterhome',
-                            'mock.com/home',
-                            'mock.com/home/thispageisdifferent/iswear']),
-                          ("You've been hit", 34, ['mock.com/home', 'mock.com/home/afterhome']),
-                          ('are_you', 32, ['mock.com/home', 'mock.com/home/afterhome']),
-                          ('by a', 10001, ['mock.com/home', 'mock.com/home/thispageisdifferent']),
-                          ('ok?',
-                           8932,
-                           ['mock.com/home/afterhome/afterafterhome',
-                            'mock.com/home',
-                            'mock.com/home/thisshouldbealone'])]
+                           ('Annie',
+                            1000,
+                            ['mock.com/home',
+                             'mock.com/home/thispageisdifferent',
+                             'mock.com/home/afterhome/afterafterhome']),
+                           ('Smooth Criminal',
+                            89323,
+                            ['mock.com/home/afterhome/afterafterhome',
+                             'mock.com/home',
+                             'mock.com/home/thispageisdifferent/iswear']),
+                           ("You've been hit", 34, ['mock.com/home', 'mock.com/home/afterhome']),
+                           ('are_you', 32, ['mock.com/home', 'mock.com/home/afterhome']),
+                           ('by a', 10001, ['mock.com/home', 'mock.com/home/thispageisdifferent']),
+                           ('ok?',
+                            8932,
+                            ['mock.com/home/afterhome/afterafterhome',
+                             'mock.com/home',
+                             'mock.com/home/thisshouldbealone'])]
         self.assertEqual(result, expected_result)
 
     # reset index makes sure the index numbers do not interfere in the assertion.
