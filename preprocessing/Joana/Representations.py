@@ -1,3 +1,5 @@
+import pandas as pd
+from pandas.io.json import json_normalize
 from preprocessing.helpers.JsonProcessor import JsonProcessor
 from preprocessing.Joana.NormalizePersona import NormalizePersona
 from preprocessing.dataAlgorithms.ReadingFiles import ReadingFiles as rf
@@ -27,7 +29,7 @@ user_persona = sortedData[sortedData['visitorId'] == user_id]['globalPersonaIdSc
 if user_persona == 'None':
     user_persona = sortedData[sortedData['visitorId'] == user_id]['personaIdScores.id'].get(user_index)
 
-user_characteristics = data_frame_result['data']
+user_characteristics = json_normalize(data_frame_result['data'])
 
 user_paths = sortedData[sortedData['visitorId'] == user_id].transactionPath
 
@@ -38,6 +40,6 @@ persona_paths.visitorId.to_sql("VISITORSID", reading_files.engine, if_exists='re
 query2 = 'SELECT visitorData FROM visitors WHERE visitorId IN (SELECT visitorId FROM VISITORSID)'
 result_query2 = reading_files.make_query(query2)
 
-persona_characteristics = reading_files.query_to_json_file(result_query2, 'visitorData', "")
+persona_characteristics = json_normalize(reading_files.query_to_json_file(result_query2, 'visitorData', ""))
 
 persona_paths = persona_paths.transactionPath
