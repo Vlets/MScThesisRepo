@@ -11,7 +11,7 @@ bigData = "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/data
 processedData = '/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/finalDataDropped.json'
 
 # THE ONE FUNCTION TO RULE THEM ALL IS do_it_all(filePath)
-'''
+
 start = time.time()
 final_dataframe = jsonTools.do_it_all(filePath)
 end = time.time()
@@ -21,6 +21,7 @@ droplist = ['geo.latitude','geo.location.lat','geo.location.lon','geo.longitude'
             'journeypersona.terms','globalPersonaIdScores',
             'personaIdScores','audience.terms', 'categories.terms']
 finaldf = final_dataframe.drop(droplist, axis=1)
+
 '''
 finaldf = jsonTools.json_read(processedData)
 finaldf = finaldf.drop('visitorId', axis=1)
@@ -37,7 +38,7 @@ print(end-start)
 column_names = list(finaldf.columns.values)
 result = kmodes_cao.cluster_centroids_
 clusters = pd.DataFrame(result, columns=column_names)
-
+'''
 # TODO: TESTS TO CONFIRM RESULTS
 
 # Save to Json/CSV. If you don't want to specify a path, simply put the filename.

@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+
 class MFAlgorithm:
 
     @staticmethod
@@ -62,12 +63,13 @@ class MFAlgorithm:
         print("Initializing Data Extraction...")
         for visitor in visitors:
             dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-            paths.append((visitor, dataResult.timestamp.tolist(), dataResult.pageUrl.tolist()))
+            timestamps = dataResult.timestamp.tolist()
+            path = dataResult.pageUrl.tolist()
+            paths.append((visitor, timestamps, path))
             sortedData = sortedData.iloc[len(dataResult):]
-
             i += 1
-            if (i % 100 == 0):
-                print("Progress:", round((i/visitor_length)*100, 2), "%")
+            if i % 100 == 0:
+                print("Progress:", round((i / visitor_length) * 100, 2), "%")
 
         result = []
 
@@ -77,4 +79,3 @@ class MFAlgorithm:
             resultPaths = MFAlgorithm.run_MF_algorithm(visitor, time, path)
             result.extend(resultPaths)
         return result
-

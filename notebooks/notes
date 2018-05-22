@@ -64,24 +64,35 @@ print(kmodes_huang.cluster_centroids_)
 print('Final training cost: {}'.format(kmodes_huang.cost_))
 print('Training iterations: {}'.format(kmodes_huang.n_iter_))
 
+# head way
+for visitor in visitors:
     start = time.time()
     x = sortedData.visitorId.value_counts()[visitor]
-    #dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-    paths.append((visitor, sortedData.timestamp.head(x).tolist(), sortedData.pageUrl.head(x).tolist()))
-    sortedData = sortedData.iloc[x:]
+    timestamps = sortedData.timestamp.head(x).tolist()
+    path = sortedData.pageUrl.head(x).tolist()
     end = time.time()
 
-    i += 1
-    if (i % 100 == 0):
-        print("Progress:", round((i/visitor_length)*100, 2), "%")
-        print(end - start)
-result = []
+    paths.append((visitor, timestamps, path))
+    sortedData = sortedData.iloc[x:]
 
-        for visitor in visitors:
+    i += 1
+    if i % 100 == 0:
+        print("Progress:", round((i / visitor_length) * 100, 2), "%")
+        print(end - start, "dataResult")
+
+
+#Original
+ for visitor in visitors:
+    start = time.time()
     dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-    paths.append((visitor, dataResult.timestamp.tolist(), dataResult.pageUrl.tolist()))
+    timestamps = dataResult.timestamp.tolist()
+    path = dataResult.pageUrl.tolist()
+    end = time.time()
+
+    paths.append((visitor, timestamps, path))
     sortedData = sortedData.iloc[len(dataResult):]
 
     i += 1
     if (i % 100 == 0):
         print("Progress:", round((i/visitor_length)*100, 2), "%")
+        print(end - start, "dataResult")
