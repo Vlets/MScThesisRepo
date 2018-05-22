@@ -55,18 +55,20 @@ class MFAlgorithm:
     @staticmethod
     def init_algorithm(sortedData):
         visitors = sortedData.visitorId.unique()
+        visitors = visitors.tolist()
         paths = []
         i = 0
         visitor_length = len(visitors)
         print("Initializing Data Extraction...")
         for visitor in visitors:
             dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-            path = dataResult.pageUrl.tolist()
-            timestamps = dataResult.timestamp.get_values()
-            paths.append((visitor, timestamps, path))
+            paths.append((visitor, dataResult.timestamp.tolist(), dataResult.pageUrl.tolist()))
             sortedData = sortedData.iloc[len(dataResult):]
+
             i += 1
-            print("Progress:", round((i/visitor_length)*100, 2), "%")
+            if (i % 100 == 0):
+                print("Progress:", round((i/visitor_length)*100, 2), "%")
+
         result = []
 
         print("Initializing Algorithm...")
