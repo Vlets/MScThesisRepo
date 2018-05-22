@@ -4,7 +4,7 @@ import time
 
 jsonTools = JsonProcessor()
 
-filePath = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test2.json"
+filePath = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test_mb.json"
 
 
 # THE ONE FUNCTION TO RULE THEM ALL IS do_it_all(filePath)

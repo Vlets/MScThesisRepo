@@ -3,8 +3,8 @@ from preprocessing.Joana.NormalizePersona import NormalizePersona
 
 json_Tools = JsonProcessor()
 
-sortedData = json_Tools.read_and_sort_data("./test2.json")
-sortedData = sortedData.reset_index().drop('index', axis=1)
+sortedData = json_Tools.do_it_all("./test_mb.json")
 
 
-sortedData = NormalizePersona.normalize_table_personas(sortedData)
+
+result_sortedData = NormalizePersona.normalize_table_personas(sortedData)
