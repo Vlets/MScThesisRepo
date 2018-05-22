@@ -23,17 +23,19 @@ droplist = ['geo.latitude','geo.location.lat','geo.location.lon','geo.longitude'
 finaldf = final_dataframe.drop(droplist, axis=1)
 '''
 finaldf = jsonTools.json_read(processedData)
+finaldf = finaldf.drop('visitorId', axis=1)
 finaldf = finaldf.astype(str)
 
-kmodes_huang = KModes(n_clusters=8, init='Huang', verbose=1)
+
+kmodes_cao = KModes(n_clusters=3, init='Cao', verbose=1)
 start = time.time()
-kmodes_huang.fit(finaldf)
+kmodes_cao.fit(finaldf)
 end = time.time()
 print(end-start)
 
 
 column_names = list(finaldf.columns.values)
-result = kmodes_huang.cluster_centroids_
+result = kmodes_cao.cluster_centroids_
 clusters = pd.DataFrame(result, columns=column_names)
 
 # TODO: TESTS TO CONFIRM RESULTS
