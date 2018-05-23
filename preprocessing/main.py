@@ -11,40 +11,12 @@ bigData = "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/data
 processedData = '/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/finalDataDropped.json'
 
 # THE ONE FUNCTION TO RULE THEM ALL IS do_it_all(filePath)
-'''
+
 start = time.time()
-final_dataframe = jsonTools.do_it_all(bigData)
+clusters = jsonTools.pipeline(bigData)
 end = time.time()
-print(end-start)
-
-droplist = ['geo.latitude','geo.location.lat','geo.location.lon','geo.longitude',
-            'journeypersona.terms','globalPersonaIdScores',
-            'personaIdScores','audience.terms', 'categories.terms']
-finaldf = final_dataframe.drop(droplist, axis=1)
-
-'''
-finaldf = jsonTools.json_read(processedData)
-finaldf = finaldf.drop(['visitorId', 'geo.city'], axis=1)
-finaldf = finaldf.astype(str)
-
-
-kmodes_cao = KModes(n_clusters=17, init='Cao', verbose=1)
-start = time.time()
-kmodes_cao.fit(finaldf)
-end = time.time()
-print(end-start)
-
-
-column_names = list(finaldf.columns.values)
-result = kmodes_cao.cluster_centroids_
-clusters = pd.DataFrame(result, columns=column_names)
-
-# TODO: TESTS TO CONFIRM RESULTS
+print("Elapsed time:", (end - start) / 60, "Minutes (", (end - start), "Seconds )")
 
 # Save to Json/CSV. If you don't want to specify a path, simply put the filename.
 # jsonTools.json_save(sortedData, "./dataFiles/testProduced", toJson=False)
-
-#df = jsonTools.json_read('/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/finalDataDropped.json')
-#finaldf = df.astype(str)
-
 

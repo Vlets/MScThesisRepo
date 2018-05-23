@@ -66,6 +66,6 @@ class MFAlgorithm:
             result_paths = MFAlgorithm.run_MF_algorithm(visitorId, time, path)
             result.extend(result_paths)
             i += 1
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 print("Progress:", round((i / visitor_length) * 100, 2), "%")
         return result
