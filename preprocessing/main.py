@@ -11,9 +11,9 @@ bigData = "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/data
 processedData = '/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/finalDataDropped.json'
 
 # THE ONE FUNCTION TO RULE THEM ALL IS do_it_all(filePath)
-
+'''
 start = time.time()
-final_dataframe = jsonTools.do_it_all(filePath)
+final_dataframe = jsonTools.do_it_all(bigData)
 end = time.time()
 print(end-start)
 
@@ -24,11 +24,11 @@ finaldf = final_dataframe.drop(droplist, axis=1)
 
 '''
 finaldf = jsonTools.json_read(processedData)
-finaldf = finaldf.drop('visitorId', axis=1)
+finaldf = finaldf.drop(['visitorId', 'geo.city'], axis=1)
 finaldf = finaldf.astype(str)
 
 
-kmodes_cao = KModes(n_clusters=3, init='Cao', verbose=1)
+kmodes_cao = KModes(n_clusters=17, init='Cao', verbose=1)
 start = time.time()
 kmodes_cao.fit(finaldf)
 end = time.time()
@@ -38,7 +38,7 @@ print(end-start)
 column_names = list(finaldf.columns.values)
 result = kmodes_cao.cluster_centroids_
 clusters = pd.DataFrame(result, columns=column_names)
-'''
+
 # TODO: TESTS TO CONFIRM RESULTS
 
 # Save to Json/CSV. If you don't want to specify a path, simply put the filename.
