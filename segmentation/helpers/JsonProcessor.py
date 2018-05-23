@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas.io.json import json_normalize
-from preprocessing.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
+from segmentation.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 from kmodes.kmodes import KModes
 
 
@@ -70,7 +70,6 @@ class JsonProcessor:
     def pipeline(self, file_path, number_of_segments=17):
         data_frame = self.pre_process(file_path)
         data_frame = self.remove_homepage_and_stringify(data_frame)
-        self.json_save(data_frame, "./dataFiles/largeFileAfterPP")
         data_frame = data_frame.drop('visitorId', axis=1)
         clusters = self.cluster_data(data_frame, number_of_segments)
         print("Finished.")

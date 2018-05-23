@@ -1,8 +1,8 @@
 import unittest
 import pandas as pd
-import preprocessing.dataFiles.mockData as dataFiles
-from preprocessing.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
-from preprocessing.helpers.JsonProcessor import JsonProcessor
+import segmentation.dataFiles.mockData as dataFiles
+from segmentation.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
+from segmentation.helpers.JsonProcessor import JsonProcessor
 
 
 # Maximal Forward Reference algorithm will be referred to as: MFA or mfa
@@ -64,7 +64,7 @@ class UnitTests(unittest.TestCase):
     # Checks if the length of the resulting list is the same as the number
     # of unique visitorIds in the initial dataframe.
     def test_did_we_miss_visitors(self):
-        path = "/Users/george/PycharmProjects/scikitLiterallyLearn/preprocessing/dataFiles/test2.json"
+        path = "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/test2.json"
         sorted_data = self.jsonTools.read_and_sort_data(path)
         mock_result = self.jsonTools.pre_process(path)
         self.assertTrue(mock_result['visitorId'].nunique() == sorted_data['visitorId'].nunique())
