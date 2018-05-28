@@ -17,11 +17,11 @@ class JsonProcessor:
     def normalize_collectors(self, data_frame):
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
-        droplist = ['collectorData', 'channel', 'dayofweek', 'doccreatedby.terms', 'doctype.terms'
-                    , 'journeyphase.terms', 'pardot.collectorId', 'pardot.lists', 'pardot.visitorId'
-                    , 'referrer.terms', 'data', 'mountId', 'pageId', 'pathInfo', 'remoteAddr'
-                    , 'visitId', 'experimentSelectedVariantList']
-        processed_data = all_data.drop(droplist, axis=1)
+        keep_list = ['visitorId', 'timestamp', 'pageUrl', 'geo.country', 'geo.city', 'geo.continent', 'audience.terms',
+                     'categories.terms', 'returningvisitor', 'newVisit', 'referer', 'userAgent', 'globalPersonaIdScores',
+                     'personaIdScores']
+        processed_data = all_data[keep_list]
+        print("Step 2/6 - Filtering, done...")
         return processed_data
 
     def read_and_sort_data(self, file_path):

@@ -23,5 +23,6 @@ class NormalizePersona:
         personaIdScores.columns = ['personaIdScores.id', 'personaIdScores.score']
         personaIdScores = personaIdScores.reset_index(drop=True)
         sortedData = sortedData.drop(columns=['globalPersonaIdScores', 'personaIdScores'])
+
         return pd.concat([sortedData, globalPersonaIdScores, personaIdScores], axis=1)
 

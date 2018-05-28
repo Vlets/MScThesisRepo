@@ -54,21 +54,17 @@ class MFAlgorithm:
 
     @staticmethod
     def init_algorithm(sortedData):
-        visitors = sortedData.visitorId.unique()
-        paths = []
-
-        for visitor in visitors:
-            dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-            path = dataResult.pageUrl.tolist()
-            timestamps = dataResult.timestamp.get_values()
-            paths.append((visitor, timestamps, path))
-
         result = []
-
-        for elem in paths:
-            visitor, time, path = elem
-            resultPaths = MFAlgorithm.run_MF_algorithm(visitor, time, path)
-            result.extend(resultPaths)
-
+        grouped = sortedData.groupby('visitorId')
+        i = 0
+        visitor_length = len(grouped)
+        print("Initializing Transaction Extraction...")
+        for visitorId, group in grouped:
+            time = grouped.get_group(visitorId).timestamp.tolist()
+            path = grouped.get_group(visitorId).pageUrl.tolist()
+            result_paths = MFAlgorithm.run_MF_algorithm(visitorId, time, path)
+            result.extend(result_paths)
+            i += 1
+            if i % 100 == 0:
+                print("Progress:", round((i / visitor_length) * 100, 2), "%")
         return result
-
