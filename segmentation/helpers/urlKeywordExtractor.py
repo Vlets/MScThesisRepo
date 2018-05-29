@@ -1,25 +1,32 @@
-from urllib.parse import urlparse
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
-url = '[https://www.onehippo.org/library/concepts/error-pages-and-error-handling/' \
-      '1.-handling-error-codes-and-exceptions-by-the-web.xml.html]'
 homepage = 'https://www.onehippo.org/'
-homepage2 = 'https://www.onehippo.com/en'
-if not url.__contains__('login'):
-    path = url[1:-1]
-    path = path.replace(homepage, " ")
-    path = path.replace(homepage2, " ")
-    path = path.replace(".html", " ")
-    path = path.replace(".xml", " ")
-    path = path.replace("/", " ")
-    path = path.replace("-", " ")
-    path = path.replace(".", " ")
-    path = path.replace(",", " ")
-    path = path.replace("\'", " ")
+homepage2 = 'https://www.onehippo.com/'
+homepage3 = 'http://www.onehippo.com/'
+homepages = [homepage, homepage2, homepage3]
 
-    path_tokens = word_tokenize(path)
+
+def getkeys(url):
+    url = url[1:-1]
+    for home_page in homepages:
+        url = url.replace(home_page, " ")
+    url = url.replace(".html", " ")
+    url = url.replace(".xml", " ")
+    url = url.replace("/", " ")
+    url = url.replace("-", " ")
+    url = url.replace(".", " ")
+    url = url.replace(",", " ")
+    url = url.replace("\'", " ")
+    path_tokens = word_tokenize(url)
     sw = set(stopwords.words('english'))
-    fs = [w for w in path_tokens if not w in sw]
+    sw.add('en')
+    sw.add('oh')
+    sw.add('1')
+    sw.add('login')
+    sw.remove('why')
+    result = [w for w in path_tokens if w not in sw]
+    return set(result)
 
-#url[2:-2]
+
+# url[2:-2]
