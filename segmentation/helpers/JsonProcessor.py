@@ -22,7 +22,7 @@ class JsonProcessor:
         print("Step 2/6 - Filtering, done...")
         return processed_data
 
-    # TODO:  When finished, remove sortBy and the typecheck. Sort by id + timestamp.
+    # TODO:  When finished, remove sortBy and the typecheck. Sort by ID + Timestamp always.
     # Step 3
     def json_sort(self, file, sort_by):
         if isinstance(sort_by, list):
@@ -42,7 +42,11 @@ class JsonProcessor:
     # Step 5
     def remove_homepage_and_stringify(self, data_frame):
         data_frame = data_frame.astype(str)
-        homepages = ["[\'https://www.onehippo.com/en\']", "[\'https://www.onehippo.org/\']"]
+        # TODO: Filter out rows that contain login instead of giving exact string
+        homepages = ["[\'https://www.onehippo.com/en\']", "[\'https://www.onehippo.org/\']",
+                     "[\'http://www.onehippo.com/en\']", "[\'https://www.onehippo.com/en/oh-dear\']",
+                     "[\'https://www.onehippo.com/wp-login.php\']", "[\'http://www.onehippo.org/wp-login.php\']",
+                     "[\'https://www.onehippo.org/wp-login.php\']", "[\'https://www.onehippo.com/de\']"]
         for homepage in homepages:
             data_frame = data_frame[data_frame.transactionPath != homepage]
         print("Step 5/6 - Remove visitors that only visited the homepage, done...")
@@ -57,6 +61,8 @@ class JsonProcessor:
         clusters = pd.DataFrame(kmodes_cao.cluster_centroids_, columns=column_names)
         print("Step 6/6 - Clustering, done...")
         return clusters
+
+# ---------------Combinations of steps for ease of testing------------------
 
     # Steps 1-3 combined
     def read_and_sort_data(self, file_path):
