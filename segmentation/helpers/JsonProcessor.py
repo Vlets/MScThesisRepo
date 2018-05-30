@@ -2,6 +2,7 @@ import pandas as pd
 from pandas.io.json import json_normalize
 from segmentation.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 from kmodes.kmodes import KModes
+from segmentation.helpers import urlKeywordExtractor as urlExtract
 
 
 class JsonProcessor:
@@ -83,6 +84,7 @@ class JsonProcessor:
         data_frame = self.pre_process(file_path)
         data_frame = self.remove_homepage_and_stringify(data_frame)
         data_frame = data_frame.drop('visitorId', axis=1)
+        data_frame['keywords'] = data_frame.transactionPath.apply(urlExtract.get_keywords)
         clusters = self.cluster_data(data_frame, number_of_segments)
         print("Finished.")
         return clusters
