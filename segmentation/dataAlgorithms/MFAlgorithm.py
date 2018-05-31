@@ -1,11 +1,15 @@
+from __future__ import print_function
+import pandas as pd
+
 class MFAlgorithm:
 
     @staticmethod
     def run_MF_algorithm(visitor, time, path):
         tuples = [('', path[0], 0, 0)]
         i = 0
-        while (i + 1) < len(path):
-            tuples.append((path[i], path[i + 1], i, i+1))
+        length = len(path)
+        while (i + 1) < length:
+            tuples.append((path[i], path[i + 1], i, i + 1))
             i += 1
 
         i = 0
@@ -13,12 +17,13 @@ class MFAlgorithm:
         flag = 1
         result = []
         timestamp = time[0]
+        length_tuples = len(tuples)
 
-        while i < len(tuples):
+        while i < length_tuples:
             varA, varB, indexA, indexB = tuples[i]
 
             if varA == '':
-                if string != []:
+                if string:
                     if string not in result:
                         result.append((visitor, timestamp, string))
                 string.append(varB)
@@ -42,31 +47,25 @@ class MFAlgorithm:
                     timestamp = time[indexA]
                 string.append(varB)
 
-
             i += 1
 
         if string not in result:
             result.append((visitor, timestamp, string))
-
         return result
 
     @staticmethod
     def init_algorithm(sortedData):
-        visitors = sortedData.visitorId.unique()
-        paths = []
-
-        for visitor in visitors:
-            dataResult = sortedData.loc[sortedData['visitorId'] == visitor]
-            path = dataResult.pageUrl.tolist()
-            timestamps = dataResult.timestamp.get_values()
-            paths.append((visitor, timestamps, path))
-
         result = []
-
-        for elem in paths:
-            visitor, time, path = elem
-            resultPaths = MFAlgorithm.run_MF_algorithm(visitor, time, path)
-            result.extend(resultPaths)
-
+        grouped = sortedData.groupby('visitorId')
+        i = 0
+        visitor_length = len(grouped)
+        print("Initializing Transaction Extraction...")
+        for visitorId, group in grouped:
+            time = grouped.get_group(visitorId).timestamp.tolist()
+            path = grouped.get_group(visitorId).pageUrl.tolist()
+            result_paths = MFAlgorithm.run_MF_algorithm(visitorId, time, path)
+            result.extend(result_paths)
+            i += 1
+            if i % 1000 == 0:
+                print("Progress:", round((i / visitor_length) * 100, 2), "%")
         return result
-

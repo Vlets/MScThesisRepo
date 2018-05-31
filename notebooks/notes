@@ -15,25 +15,13 @@ class JsonProcessor:
         return j_content
 
 
-
         # km = KPrototypes(n_clusters=4, init='Cao', verbose=16)
 
 # clusters = km.fit_predict(sortedData, categorical=categoricalData)
 
 # print(km.cluster_centroids_)
 
-mockData = [{'visitorId': '1', 'pageUrl': 'mock.com/home', 'timestamp': '1'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': '3'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': '5'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home', 'timestamp': '7'},
-            {'visitorId': '1', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': '9'},
-            {'visitorId': '2', 'pageUrl': 'mock.com/home', 'timestamp': '1'},
-            {'visitorId': '2', 'pageUrl': 'mock.com/home/afterhome', 'timestamp': '3'},
-            {'visitorId': '3', 'pageUrl': 'mock.com/home/afterhome/afterafterhome', 'timestamp': '5'},
-            {'visitorId': '3', 'pageUrl': 'mock.com/home', 'timestamp': '7'},
-            {'visitorId': '3', 'pageUrl': 'mock.com/home/thisshouldbealone', 'timestamp': '9'}]
 
-mockDataFrame = pd.DataFrame(mockData)
 
 #categoricalData = ["audience", "visitorId", "channel", "url", "geo", "newVisit"]
 
@@ -52,3 +40,22 @@ df1 = pd.DataFrame(data={'id': [1, 2, 2, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 8],
 
 df2 = pd.DataFrame(data={'id': [1, 2, 3, 5, 6, 7, 8], 'timestamp': [11, 21, 31, 51, 61, 71, 81],
                          'suresure': [22, 22, 22, 22, 22, 22, 22], 'heyhey': [22, 22, 22, 22, 22, 22, 22]})
+
+
+droplist = ['geo.latitude','geo.location.lat','geo.location.lon','geo.longitude', 'journeypersona.terms', 'pageviews','globalPersonaIdScores','personaIdScores','audience.terms', 'categories.terms']
+finaldf = final_dataframe.drop(droplist, axis=1)
+
+
+############## Print clustering results if needd
+# Print cluster centroids of the trained model.
+print('k-modes (Huang) centroids:')
+print(kmodes_huang.cluster_centroids_)
+# Print training statistics
+print('Final training cost: {}'.format(kmodes_huang.cost_))
+print('Training iterations: {}'.format(kmodes_huang.n_iter_))
+
+
+############# Normalize collectors and drop columns
+        # collector_data = json_normalize(data_frame['collectorData'])
+        # all_data = pd.concat([collector_data, data_frame], axis=1)
+        # processed_data = all_data.drop(droplist, axis=1)
