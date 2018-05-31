@@ -18,7 +18,7 @@ class JsonProcessor:
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
         keep_list = ['visitorId', 'timestamp', 'pageUrl', 'geo.country',
-                     'returningvisitor', 'newVisit', 'referer', 'userAgent']
+                     'returningvisitor', 'newVisit', 'referer']
         processed_data = all_data[keep_list]
         print("Step 2/6 - Filtering, done...")
         return processed_data
@@ -73,18 +73,18 @@ class JsonProcessor:
         sorted_data = self.json_sort(processed_data, sort_by)
         return sorted_data.reset_index(drop=True)
 
-    # Steps 1-4
+    # Steps 1-5
     def pre_process(self, file_path):
         data_frame = self.read_and_sort_data(file_path)
         data_frame = self.get_transactions(data_frame)
+        data_frame = self.remove_homepage_and_stringify(data_frame)
+        data_frame = data_frame.drop('visitorId', axis=1)
+        data_frame['keywords'] = data_frame.transactionPath.apply(urlExtract.get_keywords)
         return data_frame
 
     # All steps
     def pipeline(self, file_path, number_of_segments=17):
         data_frame = self.pre_process(file_path)
-        data_frame = self.remove_homepage_and_stringify(data_frame)
-        data_frame = data_frame.drop('visitorId', axis=1)
-        data_frame['keywords'] = data_frame.transactionPath.apply(urlExtract.get_keywords)
         clusters = self.cluster_data(data_frame, number_of_segments)
         print("Finished.")
         return clusters
