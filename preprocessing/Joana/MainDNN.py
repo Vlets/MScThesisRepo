@@ -22,15 +22,15 @@ reading_files = rf()
 reading_files.connect_to_database(uri)
 
 
-sortedData = json_Tools.do_it_all("./test2.json")
-sortedData.to_json("./test2_processed.json")
+#sortedData = json_Tools.do_it_all("./test2.json")
+#sortedData.to_json("./test2_processed.json")
 
-#sortedData = pd.read_json("./test2_processed.json")
+sortedData = pd.read_json("./test2_processed_personas.json")
 #sortedData = sortedData.reset_index(drop=True)
+#sortedData = sortedData.drop(columns=['referer', 'audience.terms', 'categories.terms', 'userAgent', 'visitorId'])
 
-sortedData = NormalizePersona.normalize_table_personas(sortedData)
-
-sortedData = sortedData.drop(columns=['referer', 'audience.terms', 'categories.terms', 'userAgent', 'visitorId'])
+#sortedData = NormalizePersona.normalize_table_personas(sortedData)
+#sortedData.to_json("./test2_processed_personas.json")
 
 
 #result = pd.get_dummies(sortedData, columns=['geo.city'])
