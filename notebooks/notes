@@ -59,3 +59,17 @@ print('Training iterations: {}'.format(kmodes_huang.n_iter_))
         # collector_data = json_normalize(data_frame['collectorData'])
         # all_data = pd.concat([collector_data, data_frame], axis=1)
         # processed_data = all_data.drop(droplist, axis=1)
+
+
+####### split list into columns
+
+s = data_frame.transactionPath.apply(lambda x: pd.Series(x)).unstack()
+df2 = data_frame.join(pd.DataFrame(s.reset_index(level=0, drop=True)))
+      .drop('transactionPath',1).rename(columns={0:'transactionPath'})
+df2 = df2[pd.notnull(df2['transactionPath'])]
+df = df2.merge(pd.get_dummies(df2.transactionPath), left_index=True, right_index=True)
+     .drop('transactionPath',1)
+
+####### way 2
+df1 = pd.get_dummies(pd.DataFrame(data_frame.transactionPath.values.tolist()), prefix='', prefix_sep='').groupby(axis=1, level=0).max()
+df2 = pd.concat([data_frame, df1], axis = 1)
