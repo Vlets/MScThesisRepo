@@ -73,3 +73,8 @@ df = df2.merge(pd.get_dummies(df2.transactionPath), left_index=True, right_index
 ####### way 2
 df1 = pd.get_dummies(pd.DataFrame(data_frame.transactionPath.values.tolist()), prefix='', prefix_sep='').groupby(axis=1, level=0).max()
 df2 = pd.concat([data_frame, df1], axis = 1)
+
+
+a = pd.DataFrame.from_csv("/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/distancematrix.csv")
+b = kmodes_cao.labels_
+silhouette_score(a,b, metric = 'precomputed')
