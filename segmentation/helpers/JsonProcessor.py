@@ -10,7 +10,7 @@ class JsonProcessor:
     # Step 1
     def json_read(self, filepath, multiline=False):
         file = pd.read_json(filepath, lines=multiline, convert_dates=False)
-        print("Step 1/6 - Reading, done...")
+        print("Step 1/7 - Reading, done...")
         return file
 
     # Step 2
@@ -20,7 +20,7 @@ class JsonProcessor:
         keep_list = ['visitorId', 'timestamp', 'pageUrl', 'geo.country',
                      'returningvisitor', 'newVisit', 'referer']
         processed_data = all_data[keep_list]
-        print("Step 2/6 - Filtering, done...")
+        print("Step 2/7 - Filtering, done...")
         return processed_data
 
     # TODO:  When finished, remove sortBy and the typecheck. Sort by ID + Timestamp always.
@@ -28,7 +28,7 @@ class JsonProcessor:
     def json_sort(self, file, sort_by):
         if isinstance(sort_by, list):
             sorted_file = file.sort_values(by=sort_by)
-            print("Step 3/6 - Sorting, done...")
+            print("Step 3/7 - Sorting, done...")
             return sorted_file
         raise ValueError("sort_by should be a list indicating column keys: [\"col1\", \"col2\", ...]")
 
@@ -37,30 +37,37 @@ class JsonProcessor:
         transactions = mfa.init_algorithm(sorted_data)
         data_frame = pd.DataFrame(transactions, columns=['visitorId', 'timestamp', 'transactionPath'])
         data_frame = pd.merge(data_frame, sorted_data, on=['visitorId', 'timestamp'])
-        print("Step 4/6 - Extract transactions, done...")
+        print("Step 4/7 - Extract transactions, done...")
         return data_frame.drop(['timestamp', 'pageUrl'], axis=1)
 
     # Step 5
-    def remove_homepage_and_stringify(self, data_frame):
-        data_frame = data_frame.astype(str)
-        # TODO: Filter out rows that contain login instead of giving exact string
-        homepages = ["[\'https://www.onehippo.com/en\']", "[\'https://www.onehippo.org/\']",
-                     "[\'http://www.onehippo.com/en\']", "[\'https://www.onehippo.com/en/oh-dear\']",
-                     "[\'https://www.onehippo.com/wp-login.php\']", "[\'http://www.onehippo.org/wp-login.php\']",
-                     "[\'https://www.onehippo.org/wp-login.php\']", "[\'https://www.onehippo.com/de\']"]
-        for homepage in homepages:
-            data_frame = data_frame[data_frame.transactionPath != homepage]
-        print("Step 5/6 - Remove visitors that only visited the homepage, done...")
+    def get_content_page_and_keywords(self, data_frame):
+        data_frame['keywords'] = data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
+        data_frame['contentPage'] = data_frame.transactionPath.str[-1]
+        print("Step 5/7 - Keep content pages and get path keywords, done...")
         return data_frame
 
     # Step 6
+    def remove_homepage_and_stringify(self, data_frame):
+        data_frame = data_frame.astype(str)
+        # TODO: Filter out rows that contain login instead of giving exact string
+        homepages = ["https://www.onehippo.com/en", "https://www.onehippo.org/",
+                     "http://www.onehippo.com/en", "https://www.onehippo.com/en/oh-dear",
+                     "https://www.onehippo.com/wp-login.php", "http://www.onehippo.org/wp-login.php",
+                     "https://www.onehippo.org/wp-login.php", "https://www.onehippo.com/de"]
+        for homepage in homepages:
+            data_frame = data_frame[data_frame.contentPage != homepage]
+        print("Step 6/7 - Remove visitors that only visited the homepage, done...")
+        return data_frame
+
+    # Step 7
     def cluster_data(self, data_frame, number_of_segments=17):
         kmodes_cao = KModes(n_clusters=number_of_segments, init='Cao', verbose=1)
         kmodes_cao.fit(data_frame)
 
         column_names = list(data_frame.columns.values)
         clusters = pd.DataFrame(kmodes_cao.cluster_centroids_, columns=column_names)
-        print("Step 6/6 - Clustering, done...")
+        print("Step 7/7 - Clustering, done...")
         return clusters
 
 # ---------------Combinations of steps for ease of testing------------------
@@ -73,13 +80,13 @@ class JsonProcessor:
         sorted_data = self.json_sort(processed_data, sort_by)
         return sorted_data.reset_index(drop=True)
 
-    # Steps 1-5
+    # Steps 1-6
     def pre_process(self, file_path):
         data_frame = self.read_and_sort_data(file_path)
         data_frame = self.get_transactions(data_frame)
-        data_frame = self.remove_homepage_and_stringify(data_frame)
         data_frame = data_frame.drop('visitorId', axis=1)
-        data_frame['keywords'] = data_frame.transactionPath.apply(urlExtract.get_keywords)
+        data_frame = self.get_content_page_and_keywords(data_frame)
+        data_frame = self.remove_homepage_and_stringify(data_frame)
         return data_frame
 
     # All steps
