@@ -79,5 +79,12 @@ a = pd.DataFrame.from_csv("/Users/george/PycharmProjects/scikitLiterallyLearn/se
 b = kmodes_cao.labels_
 silhouette_score(a,b, metric = 'precomputed')
 
+or
+
+a = pd.read_csv(
+    "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/8juneSmallPCM.csv")
+b = kmodes_cao.labels_
+print("Silhouette score:", silhouette_score(a, b, metric='precomputed'))
+
 ###### Keep the content pages
 data_frame['contentPage']= data_frame.transactionPath.str[-1]
