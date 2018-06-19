@@ -1,5 +1,5 @@
 from preprocessing.helpers.JsonProcessor import JsonProcessor
-from preprocessing.Joana.NormalizePersona import NormalizePersona
+from preprocessing.dataAlgorithms.NormalizePersona import NormalizePersona
 
 json_Tools = JsonProcessor()
 
