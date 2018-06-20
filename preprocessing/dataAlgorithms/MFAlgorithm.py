@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class MFAlgorithm:
 
     @staticmethod
@@ -14,9 +15,9 @@ class MFAlgorithm:
     def categories_value(dict_path_categories, string):
         size_dict = len(dict_path_categories)
         count_nan = list(dict_path_categories.values()).count(np.nan)
-        if size_dict > 1 and count_nan == size_dict:
+        if 1 < size_dict == count_nan:
             categories = np.nan
-        elif size_dict > 1 and count_nan != size_dict:
+        elif 1 < size_dict != count_nan:
             categories = [dict_path_categories[x] for x in string if isinstance(dict_path_categories[x], list)]
             categories = [item for sublist in categories for item in sublist]
             categories = MFAlgorithm.remove_duplicates(categories)
@@ -31,7 +32,7 @@ class MFAlgorithm:
         i = 0
         path_size = len(path)
         while (i + 1) < path_size:
-            tuples.append((path[i], path[i + 1], i, i+1))
+            tuples.append((path[i], path[i + 1], i, i + 1))
             i += 1
 
         i = 0
@@ -70,7 +71,6 @@ class MFAlgorithm:
                     flag = 1
                     timestamp = time[indexA]
                 string.append(varB)
-
 
             i += 1
 
