@@ -19,7 +19,7 @@ class JsonProcessor:
         all_data = pd.concat([collector_data, data_frame], axis=1)
         keep_list = ['visitorId', 'timestamp', 'pageUrl', 'geo.country', 'geo.city', 'geo.continent', 'audience.terms',
                      'categories.terms', 'returningvisitor', 'newVisit', 'referer', 'userAgent', 'globalPersonaIdScores',
-                     'personaIdScores']
+                     'personaIdScores']#, 'doctype.terms', 'pageId']
         processed_data = all_data[keep_list]
         print("Step 2/6 - Filtering, done...")
         return processed_data
@@ -33,10 +33,11 @@ class JsonProcessor:
 
     def do_it_all(self, file_path):
         sorted_data = self.read_and_sort_data(file_path)
+        sorted_data.columns = sorted_data.columns.str.replace("[.]", "_")
         transactions = mfa.init_algorithm(sorted_data)
-        transaction_dataframe = pd.DataFrame(transactions, columns=['visitorId', 'timestamp', 'transactionPath'])
+        transaction_dataframe = pd.DataFrame(transactions, columns=['visitorId', 'timestamp', 'transactionPath', 'categories'])
         final_data_frame = pd.merge(transaction_dataframe, sorted_data, on=['visitorId', 'timestamp'])
-        return final_data_frame.drop(['timestamp', 'pageUrl'], axis=1)
+        return final_data_frame.drop(['timestamp', 'pageUrl', 'categories_terms'], axis=1)
 
     def json_save(self, sorted_data, savepath, to_json=True):
         if to_json:

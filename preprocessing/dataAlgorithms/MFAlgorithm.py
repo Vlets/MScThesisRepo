@@ -1,7 +1,23 @@
+import numpy as np
+
 class MFAlgorithm:
 
     @staticmethod
-    def run_MF_algorithm(visitor, time, path):
+    def categories_value(dict_path_categories, string):
+        size_dict = len(dict_path_categories)
+        count_nan = list(dict_path_categories.values()).count(np.nan)
+        if size_dict > 1 and count_nan == size_dict:
+            categories = np.nan
+        elif size_dict > 1 and count_nan != size_dict:
+            categories = [dict_path_categories[x] for x in string if isinstance(dict_path_categories[x], list)]
+            categories = [item for sublist in categories for item in sublist]
+        else:
+            categories = list(dict_path_categories.values())[0]
+
+        return categories
+
+    @staticmethod
+    def run_MF_algorithm(visitor, time, path, dict_path_categories):
         tuples = [('', path[0], 0, 0)]
         i = 0
         path_size = len(path)
@@ -22,7 +38,8 @@ class MFAlgorithm:
             if varA == '':
                 if string:
                     if string not in result:
-                        result.append((visitor, timestamp, string))
+                        categories = MFAlgorithm.categories_value(dict_path_categories, string)
+                        result.append((visitor, timestamp, string, categories))
                 string.append(varB)
                 timestamp = time[indexB]
                 i += 1
@@ -31,7 +48,8 @@ class MFAlgorithm:
             if varB in string:
                 if flag == 1:
                     if string not in result:
-                        result.append((visitor, timestamp, string))
+                        categories = MFAlgorithm.categories_value(dict_path_categories, string)
+                        result.append((visitor, timestamp, string, categories))
                 index = string.index(varB)
                 string = string[0:index + 1]
                 flag = 0
@@ -48,7 +66,8 @@ class MFAlgorithm:
             i += 1
 
         if string not in result:
-            result.append((visitor, timestamp, string))
+            categories = MFAlgorithm.categories_value(dict_path_categories, string)
+            result.append((visitor, timestamp, string, categories))
 
         return result
 
@@ -62,7 +81,9 @@ class MFAlgorithm:
         for visitorId, group in grouped:
             time = grouped.get_group(visitorId).timestamp.tolist()
             path = grouped.get_group(visitorId).pageUrl.tolist()
-            result_paths = MFAlgorithm.run_MF_algorithm(visitorId, time, path)
+            categories = grouped.get_group(visitorId).categories_terms.tolist()
+            dict_path_categories = dict(zip(path, categories))
+            result_paths = MFAlgorithm.run_MF_algorithm(visitorId, time, path, dict_path_categories)
             result.extend(result_paths)
             i += 1
             if i % 100 == 0:
