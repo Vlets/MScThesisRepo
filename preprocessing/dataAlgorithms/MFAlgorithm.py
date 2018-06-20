@@ -3,6 +3,14 @@ import numpy as np
 class MFAlgorithm:
 
     @staticmethod
+    def remove_duplicates(duplicate):
+        final_list = []
+        for num in duplicate:
+            if num not in final_list:
+                final_list.append(num)
+        return final_list
+
+    @staticmethod
     def categories_value(dict_path_categories, string):
         size_dict = len(dict_path_categories)
         count_nan = list(dict_path_categories.values()).count(np.nan)
@@ -11,6 +19,7 @@ class MFAlgorithm:
         elif size_dict > 1 and count_nan != size_dict:
             categories = [dict_path_categories[x] for x in string if isinstance(dict_path_categories[x], list)]
             categories = [item for sublist in categories for item in sublist]
+            categories = MFAlgorithm.remove_duplicates(categories)
         else:
             categories = list(dict_path_categories.values())[0]
 
