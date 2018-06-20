@@ -13,14 +13,14 @@ class NormalizePersona:
         globalPersonaIdScores = [pd.DataFrame(data={'id': ["None"], 'score': [np.nan]}) if elem.empty else elem for elem
                                  in globalPersonaIdScores]
         globalPersonaIdScores = pd.concat(globalPersonaIdScores)
-        globalPersonaIdScores.columns = ['globalPersonaIdScores.id', 'globalPersonaIdScores.score']
+        globalPersonaIdScores.columns = ['globalPersonaIdScores_id', 'globalPersonaIdScores_score']
         globalPersonaIdScores = globalPersonaIdScores.reset_index(drop=True)
         personaIdScores = [pd.DataFrame(json_normalize(x)) for x in [[y[0]] if len(y) > 1 else y for y
                                                                      in sortedData['personaIdScores']]]
         personaIdScores = [pd.DataFrame(data={'id': ["None"], 'score': [np.nan]}) if elem.empty else elem for elem
                            in personaIdScores]
         personaIdScores = pd.concat(personaIdScores)
-        personaIdScores.columns = ['personaIdScores.id', 'personaIdScores.score']
+        personaIdScores.columns = ['personaIdScores_id', 'personaIdScores_score']
         personaIdScores = personaIdScores.reset_index(drop=True)
         sortedData = sortedData.drop(columns=['globalPersonaIdScores', 'personaIdScores'])
 

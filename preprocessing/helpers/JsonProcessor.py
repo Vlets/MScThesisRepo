@@ -18,7 +18,7 @@ class JsonProcessor:
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
         keep_list = ['visitorId', 'timestamp', 'pageUrl', 'geo.country', 'geo.city', 'geo.continent', 'audience.terms',
-                     'categories.terms', 'returningvisitor', 'newVisit', 'referer', 'userAgent', 'globalPersonaIdScores',
+                     'categories.terms', 'returningvisitor', 'userAgent', 'globalPersonaIdScores',
                      'personaIdScores']#, 'doctype.terms', 'pageId']
         processed_data = all_data[keep_list]
         print("Step 2/6 - Filtering, done...")
