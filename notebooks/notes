@@ -112,12 +112,12 @@ processedData = '/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation
 
 data_frame = jsonTools.pre_process(filePath)
 
-data_frame = data_frame.drop(['geo.country', 'transactionPath'], axis=1)
+data_frame = data_frame.drop(['geo.country', 'transactionPath', 'referer', 'newVisit'], axis=1)
 data_frame = data_frame.astype(str)
 
-range_n_clusters = range(6, 12)
+range_n_clusters = range(12, 15)
 a = pd.read_csv(
-        "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/8juneSmallPCM.csv")
+        "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/20juneSmallPCM.csv")
 
 for n_clusters in range_n_clusters:
 
@@ -126,7 +126,7 @@ for n_clusters in range_n_clusters:
 
     ax1.set_xlim([-0.1, 1])
     ax1.set_ylim([0, len(data_frame) + (n_clusters + 1) * 10])
-    kmodes_cao = KModes(n_clusters=n_clusters, init='Cao', verbose=1)
+    kmodes_cao = KModes(n_clusters=n_clusters, init='Cao', verbose=0)
     kmodes_cao.fit_predict(data_frame)
 
     column_names = list(data_frame.columns.values)
@@ -163,6 +163,8 @@ for n_clusters in range_n_clusters:
         # Compute the new y_lower for next plot
         y_lower = y_upper + 10  # 10 for the 0 samples
 
+    ax1.set_title(("Silhouette analysis for KModes clustering "
+                  "with clusters = %d" % n_clusters))
     ax1.set_xlabel("The silhouette coefficient values")
     ax1.set_ylabel("Cluster label")
 
@@ -174,11 +176,10 @@ for n_clusters in range_n_clusters:
 
     # Draw white circles at cluster centers
 
-    plt.suptitle(("Silhouette analysis for KModes clustering "
-                  "with clusters = %d" % n_clusters),
-                 fontsize=14, fontweight='bold')
+
 
     plt.show()
 
 # Save to Json/CSV. If you don't want to specify a path, simply put the filename.
 # jsonTools.json_save(sortedData, "./dataFiles/testProduced", to_json=False)
+
