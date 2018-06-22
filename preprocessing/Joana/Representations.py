@@ -23,16 +23,16 @@ query = 'SELECT visitorData FROM visitors WHERE visitorId = ' + user_id_sql
 result = reading_files.make_query(query)
 data_frame_result = reading_files.query_to_json_file(result, 'visitorData', "")[0]
 
-user_persona = sortedData[sortedData['visitorId'] == user_id]['globalPersonaIdScores.id'].get(user_index)
+user_persona = sortedData[sortedData['visitorId'] == user_id]['globalPersonaIdScores_id'].get(user_index)
 
 if user_persona == 'None':
-    user_persona = sortedData[sortedData['visitorId'] == user_id]['personaIdScores.id'].get(user_index)
+    user_persona = sortedData[sortedData['visitorId'] == user_id]['personaIdScores_id'].get(user_index)
 
 user_characteristics = json_normalize(data_frame_result['data'])
 
 user_paths = sortedData[sortedData['visitorId'] == user_id].transactionPath
 
-persona_paths = sortedData[sortedData['globalPersonaIdScores.id'] == user_persona]
+persona_paths = sortedData[sortedData['globalPersonaIdScores_id'] == user_persona]
 
 persona_paths.visitorId.to_sql("VISITORSID", reading_files.engine, if_exists='replace')
 
