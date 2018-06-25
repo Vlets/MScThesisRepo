@@ -1,6 +1,5 @@
 from preprocessing.helpers.JsonProcessor import JsonProcessor
 from preprocessing.dataAlgorithms.NormalizePersona import NormalizePersona
-from preprocessing.dataAlgorithms.ReadingFiles import ReadingFiles as rf
 import pandas as pd
 import numpy as np
 
@@ -10,6 +9,7 @@ class PreprocessingData:
     def __init__(self):
         self.list_categories = None
         self.list_audience = None
+        self.json_tools = JsonProcessor()
 
     @staticmethod
     def remove_duplicates(duplicate):
@@ -62,30 +62,9 @@ class PreprocessingData:
 
         return categories_table
 
-    def run_preprocessing(self, name_file):
+    def preprocessing_DNN(self, sortedData, file_name):
 
-        uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
-
-        json_Tools = JsonProcessor()
-
-        reading_files = rf()
-        reading_files.connect_to_database(uri)
-
-        sortedData = json_Tools.do_it_all(name_file)
-        # sortedData = json_Tools.do_it_all("./test_mb.json")
-        # sortedData.to_json("./test2_processed.json")
-
-        # sortedData = pd.read_json("./test2_processed_personas.json")
-        # sortedData = sortedData.reset_index(drop=True)
-        # sortedData = sortedData.drop(columns=['referer', 'audience.terms', 'categories.terms', 'userAgent', 'visitorId'])
-
-        sortedData = NormalizePersona.normalize_table_personas(sortedData)
-        # sortedData.to_json("./test2_processed_personas.json")
-
-        # sortedData = pd.read_json("./test2_processed_personas.json")
-        # sortedData = sortedData.reset_index(drop=True)
-
-        items_table = json_Tools.make_items_table()
+        items_table = self.json_tools.make_items_table()
         items_table = items_table[pd.notna(items_table['categories_terms'])]
         items_table = items_table[items_table.astype(str)['categories_terms'] != '[\'\']']
         items_table = items_table.reset_index(drop=True)
@@ -103,4 +82,22 @@ class PreprocessingData:
         sortedData = sortedData.drop(columns=['transactionPath', 'visitorId', 'userAgent'])
         sortedData = pd.concat([sortedData, audience_table, categories_table], axis=1)
         sortedData = sortedData.drop(columns=['audience_terms'])
-        sortedData.to_json("./processed_table_3.json")
+        sortedData.to_json(file_name)
+
+    def run_preprocessing(self, name_file):
+
+        sortedData = self.json_tools.do_it_all(name_file)
+        # sortedData = json_Tools.do_it_all("./test_mb.json")
+        # sortedData.to_json("./test2_processed.json")
+
+        # sortedData = pd.read_json("./test2_processed_personas.json")
+        # sortedData = sortedData.reset_index(drop=True)
+        # sortedData = sortedData.drop(columns=['referer', 'audience.terms', 'categories.terms', 'userAgent', 'visitorId'])
+
+        sortedData = NormalizePersona.normalize_table_personas(sortedData)
+        # sortedData.to_json("./test2_processed_personas.json")
+
+        # sortedData = pd.read_json("./test2_processed_personas.json")
+        # sortedData = sortedData.reset_index(drop=True)
+
+        return sortedData

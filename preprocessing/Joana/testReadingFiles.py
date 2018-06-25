@@ -1,5 +1,5 @@
-from preprocessing.dataAlgorithms.ReadingFiles import ReadingFiles as rf
-from preprocessing.Joana.PreprocessingData import PreprocessingData
+from preprocessing.helpers.ReadingFiles import ReadingFiles as rf
+from preprocessing.helpers.PreprocessingData import PreprocessingData
 
 uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
 
@@ -18,4 +18,4 @@ reading_files.query_to_json_file(query_result, 'entry',
 #result = reading_files.query_to_json_file(query_result2, 'visitorData', "")
 
 pre_data = PreprocessingData()
-pre_data.run_preprocessing("./test3.json")
+pre_data.preprocessing_DNN("./test3.json")
