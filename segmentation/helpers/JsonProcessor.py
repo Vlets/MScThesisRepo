@@ -14,6 +14,7 @@ class JsonProcessor:
         return file
 
     # Step 2
+    # Keep list defines all the columns to be kept in the pipeline. All others are dropped.
     def filter_columns(self, data_frame):
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
@@ -87,7 +88,7 @@ class JsonProcessor:
         return data_frame
 
     # All steps
-    def pipeline(self, file_path, number_of_segments=10):
+    def segmentation_pipeline(self, file_path, number_of_segments=10):
         data_frame = self.read_and_sort_data(file_path)
         data_frame = self.pre_process(data_frame)
         clusters = self.cluster_data(data_frame, number_of_segments)

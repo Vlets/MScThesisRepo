@@ -7,5 +7,5 @@ bigData = "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataF
 
 # THE ONE FUNCTION TO RULE THEM ALL IS pipeline(filePath)
 
-clusters = jsonTools.pipeline(filePath, 26)
+clusters = jsonTools.segmentation_pipeline(bigData, 26)
 
