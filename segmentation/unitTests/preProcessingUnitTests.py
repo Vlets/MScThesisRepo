@@ -66,13 +66,12 @@ class UnitTests(unittest.TestCase):
     def test_did_we_miss_visitors(self):
         path = "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/test2.json"
         sorted_data = self.jsonTools.read_and_sort_data(path)
-        mock_result = self.jsonTools.pre_process(path)
+        mock_result = self.jsonTools.get_transactions(sorted_data)
         self.assertTrue(mock_result['visitorId'].nunique() == sorted_data['visitorId'].nunique())
 
     def process_data(self, data):
         data_frame = pd.DataFrame(data)
-        sort_by = ["visitorId", "timestamp"]
-        sorted_data = self.jsonTools.json_sort(data_frame, sort_by)
+        sorted_data = self.jsonTools.json_sort(data_frame)
         return sorted_data
 
 
