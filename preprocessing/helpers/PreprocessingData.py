@@ -20,21 +20,11 @@ class PreprocessingData:
         return final_list
 
     @staticmethod
-    def create_categories_list(items_table, word):
-        if word == 'categories_terms':
-            list_categories = [x for x in items_table.categories_terms.values.tolist() if str(x) != 'nan']
-        elif word == 'categories':
-            list_categories = [x for x in items_table.categories.values.tolist() if str(x) != 'nan']
+    def create_list(items_table, word):
+        list_categories = [x for x in items_table[word].values.tolist() if str(x) != 'nan']
         categories = [item for sublist in list_categories for item in sublist]
         categories = PreprocessingData.remove_duplicates(categories)
         return categories
-
-    @staticmethod
-    def create_audience_list(items_table):
-        list_audience = [x for x in items_table.audience_terms.values.tolist() if str(x) != 'nan']
-        audience = [item for sublist in list_audience for item in sublist]
-        audience = PreprocessingData.remove_duplicates(audience)
-        return audience
 
     @staticmethod
     def sublist(lst1, lst2):
@@ -68,7 +58,7 @@ class PreprocessingData:
         items_table = items_table[pd.notna(items_table['categories_terms'])]
         items_table = items_table[items_table.astype(str)['categories_terms'] != '[\'\']']
         items_table = items_table.reset_index(drop=True)
-        list_categories = self.create_categories_list(items_table, 'categories_terms')
+        list_categories = self.create_list(items_table, 'categories_terms')
         self.list_categories = list_categories
         sortedData = sortedData[pd.notna(sortedData['categories'])]
         sortedData = sortedData.reset_index(drop=True)
@@ -76,13 +66,15 @@ class PreprocessingData:
         sortedData = sortedData[sortedData.astype(str)['categories'] != '[]']
         sortedData = sortedData.reset_index(drop=True)
         categories_table = self.create_table(list_categories, sortedData, 'categories')
-        list_audience = self.create_audience_list(items_table)
+        list_audience = self.create_list(items_table, 'audience_terms')
         self.list_audience = list_audience
         audience_table = self.create_table(list_audience, sortedData, 'audience_terms')
-        sortedData = sortedData.drop(columns=['transactionPath', 'visitorId', 'userAgent'])
         sortedData = pd.concat([sortedData, audience_table, categories_table], axis=1)
-        sortedData = sortedData.drop(columns=['audience_terms'])
+        sortedData = sortedData.drop(columns=['transactionPath', 'userAgent', 'audience_terms'])
         sortedData.to_json(file_name)
+
+        return items_table
+
 
     def run_preprocessing(self, name_file):
 

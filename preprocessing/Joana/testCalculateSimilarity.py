@@ -13,9 +13,9 @@ web_page_categories5 = "configuration development how-do-i"
 web_page_categories6 = "development how-do-i relevance"
 web_page_categories7 = "architecture development hst about"
 
-similarities_str = cs.similarity_results([str1], [str2, str3, str4])
-similarities_web = cs.similarity_results([web_page_categories1, web_page_categories6], [web_page_categories2,
-                                                                                        web_page_categories3,
-                                                                                        web_page_categories4,
-                                                                                        web_page_categories5,
-                                                                                        web_page_categories7])
+similarities_str = cs.similarity_results([('item1', str1)], [('item2', str2), ('item3', str3), ('item4', str4)])
+#similarities_web = cs.similarity_results([web_page_categories1, web_page_categories6], [web_page_categories2,
+#                                                                                        web_page_categories3,
+#                                                                                        web_page_categories4,
+#                                                                                        web_page_categories5,
+#                                                                                        web_page_categories7])

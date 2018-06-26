@@ -1,4 +1,5 @@
 from preprocessing.helpers.PreprocessingData import PreprocessingData
+from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense
 import matplotlib.pyplot as plt
@@ -34,10 +35,10 @@ class DNNModel:
 
 
     @staticmethod
-    def preprocess_data(file):
+    def preprocess_data(file, visitors):
         data_to_process = pd.read_json(file)
 
-        list_categories = PreprocessingData.create_categories_list(data_to_process, 'categories')
+        list_categories = PreprocessingData.create_list(data_to_process, 'categories')
         data_to_process = data_to_process.reset_index(drop=True)
 
         categories_table = data_to_process[list_categories]
@@ -48,8 +49,14 @@ class DNNModel:
         data_to_process['geo_continent'] = data_to_process['geo_continent'].astype(str)
         data_to_process['geo_country'] = data_to_process['geo_country'].astype(str)
 
+        list_indexes_visitor = data_to_process.index[data_to_process['visitorId'].isin(visitors)]
+        categories_tables_visitors = categories_table.loc[list_indexes_visitor]
+        categories_table = categories_table.drop(list_indexes_visitor)
+        categories_table = categories_table.reset_index(drop=True)
+
         # 2nd step, chose the "labels"
         Y = categories_table.iloc[:, :].values
+        Y_visitors = categories_tables_visitors.iloc[:, :].values
 
         # 3rd step, drop the labels
         list_categories.extend(['categories'])
@@ -66,19 +73,26 @@ class DNNModel:
         users_table = pd.concat([users_table, result_cities, result_continent, result_country, result_persona_id,
                                  result_global_persona_id], axis=1)
 
+        visitors_table = users_table[users_table['visitorId'].isin(visitors)]
+        users_table = users_table[~users_table['visitorId'].isin(visitors)]
+
+        visitors_table = visitors_table.drop(columns=['visitorId'])
+        users_table = users_table.drop(columns=['visitorId'])
+
+        visitors_table = visitors_table.reset_index(drop=True)
+        users_table = users_table.reset_index(drop=True)
+
         # 5th step, get the wanted input
         X = users_table.iloc[:, :].values
+        X_visitors = visitors_table.iloc[:, :].values
 
 
-        return X, Y, users_table, categories_table, data_to_process
+        return X, Y, X_visitors, Y_visitors, users_table, visitors_table, categories_table, categories_tables_visitors, data_to_process
 
 
     def create_model(self, length_x, length_y):
         model = Sequential()
         model.add(Dense(32, activation='relu', input_shape=(length_x,)))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(32, activation='relu'))
         model.add(Dense(32, activation='relu'))
         model.add(Dense(length_y, activation='sigmoid'))
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
@@ -88,13 +102,13 @@ class DNNModel:
 
 
     def train_model(self, X, Y, graphs=False):
-        #X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
 
-        X_train = X[:8982]
-        X_test = X[8982:]
+        #X_val = X_train[:8982]
+        #partial_x_train = X_train[8982:]
 
-        Y_train = Y[:8982]
-        Y_test = Y[8982:]
+        #Y_val = Y_train[:8982]
+        #partial_y_test = Y_train[8982:]
 
         X_val = X_train[:1000]
         partial_x_train = X_train[1000:]
@@ -104,7 +118,7 @@ class DNNModel:
 
         history = self.model.fit(partial_x_train,
                                  partial_y_train,
-                                 epochs=10,
+                                 epochs=15,
                                  batch_size=512,
                                  validation_data=(X_val, Y_val))
 
@@ -136,7 +150,7 @@ class DNNModel:
             plt.plot(epochs, val_acc, 'b', label='Validation acc')
             plt.title('Training and validation accuracy')
             plt.xlabel('Epochs')
-            plt.ylabel('Loss')
+            plt.ylabel('Accuracy')
             plt.legend()
             plt.show()
 
