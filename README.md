@@ -1,4 +1,4 @@
-# scikitLiterallyLearn
+# MSc Software Engineering Thesis Repo
 
 Repo for the MSc Software Engineering(University of Amsterdam) Thesis code.
 
