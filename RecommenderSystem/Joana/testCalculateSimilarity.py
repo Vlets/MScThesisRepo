@@ -1,4 +1,4 @@
-from preprocessing.dataAlgorithms.CalculateSimilarity import CalculateSimilarity as cs
+from RecommenderSystem.DataAlgorithms.CalculateSimilarity import CalculateSimilarity as cs
 
 str1 = "about architecture deployment about deployment about releasenotes about architecture deployment"
 str2 = "about development cms development upgrade upgrade upgrade installation upgrade"

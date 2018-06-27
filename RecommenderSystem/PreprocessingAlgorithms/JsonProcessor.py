@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas.io.json import json_normalize
-from preprocessing.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
+from RecommenderSystem.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 
 
 class JsonProcessor:
@@ -26,7 +26,7 @@ class JsonProcessor:
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
         keep_list = ['visitorId', 'timestamp', 'pageUrl', 'geo.country', 'geo.city', 'geo.continent', 'audience.terms',
-                     'categories.terms', 'userAgent', 'globalPersonaIdScores', 'personaIdScores', 'pageId']
+                     'categories.terms', 'globalPersonaIdScores', 'personaIdScores', 'pageId']
         processed_data = all_data[keep_list]
         print("Step 2/6 - Filtering, done...")
         return processed_data
@@ -34,7 +34,7 @@ class JsonProcessor:
     def make_items_table(self):
         table = self.file
         keep_values = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
-        keep_columns = ['pageUrl', 'audience_terms', 'categories_terms', 'pageId']
+        keep_columns = ['pageUrl', 'audience_terms', 'categories_terms']
         items_table = table.loc[table['pageId'].isin(keep_values)]
         items_table = items_table[keep_columns]
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)

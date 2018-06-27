@@ -1,5 +1,5 @@
-from preprocessing.helpers.ReadingFiles import ReadingFiles as rf
-from preprocessing.helpers.PreprocessingData import PreprocessingData
+from RecommenderSystem.PreprocessingAlgorithms.ReadingFiles import ReadingFiles as rf
+from RecommenderSystem.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
 
 uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
 
@@ -14,7 +14,7 @@ query_result = reading_files.make_query(query)
 #query_result2 = reading_files.make_query(query2)
 
 reading_files.query_to_json_file(query_result, 'entry',
-                                 "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test3.json")
+                                 "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem/Joana/test3.json")
 #result = reading_files.query_to_json_file(query_result2, 'visitorData', "")
 
 pre_data = PreprocessingData()

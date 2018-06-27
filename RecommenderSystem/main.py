@@ -1,10 +1,10 @@
-from preprocessing.helpers.JsonProcessor import JsonProcessor
-import preprocessing.dataFiles.mockData as dataFiles
+from RecommenderSystem.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
+import RecommenderSystem.dataFiles.mockData as dataFiles
 import time
 
 jsonTools = JsonProcessor()
 
-filePath = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/preprocessing/Joana/test_mb.json"
+filePath = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem/Joana/test_mb.json"
 
 
 # THE ONE FUNCTION TO RULE THEM ALL IS do_it_all(filePath)

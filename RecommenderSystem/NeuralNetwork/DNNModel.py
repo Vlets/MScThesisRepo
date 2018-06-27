@@ -1,4 +1,5 @@
-from preprocessing.helpers.PreprocessingData import PreprocessingData
+from RecommenderSystem.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
+from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense
@@ -33,10 +34,9 @@ class DNNModel:
 
         return (sum(accuracy_values) / len(accuracy_values))
 
-
     @staticmethod
-    def preprocess_data(file, visitors):
-        data_to_process = pd.read_json(file)
+    def preprocess_data(data_to_process, visitors):
+        #data_to_process = pd.read_json(file)
 
         list_categories = PreprocessingData.create_list(data_to_process, 'categories')
         data_to_process = data_to_process.reset_index(drop=True)
@@ -86,9 +86,7 @@ class DNNModel:
         X = users_table.iloc[:, :].values
         X_visitors = visitors_table.iloc[:, :].values
 
-
         return X, Y, X_visitors, Y_visitors, users_table, visitors_table, categories_table, categories_tables_visitors, data_to_process
-
 
     def create_model(self, length_x, length_y):
         model = Sequential()
@@ -100,15 +98,14 @@ class DNNModel:
 
         return model
 
-
     def train_model(self, X, Y, graphs=False):
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
 
-        #X_val = X_train[:8982]
-        #partial_x_train = X_train[8982:]
+        # X_val = X_train[:8982]
+        # partial_x_train = X_train[8982:]
 
-        #Y_val = Y_train[:8982]
-        #partial_y_test = Y_train[8982:]
+        # Y_val = Y_train[:8982]
+        # partial_y_test = Y_train[8982:]
 
         X_val = X_train[:1000]
         partial_x_train = X_train[1000:]
@@ -118,7 +115,7 @@ class DNNModel:
 
         history = self.model.fit(partial_x_train,
                                  partial_y_train,
-                                 epochs=15,
+                                 epochs=10,
                                  batch_size=512,
                                  validation_data=(X_val, Y_val))
 
@@ -127,7 +124,6 @@ class DNNModel:
         predictions = self.model.predict(X_test)
         predictions[predictions >= 0.5] = 1
         predictions[predictions < 0.5] = 0
-
 
         final_result = DNNModel.calculate_accuracy(predictions, Y_test)
 
@@ -156,7 +152,20 @@ class DNNModel:
 
         return results, predictions, final_result
 
+    def predict_values(self, input_x):
+        return self.model.predict(input_x)
 
-    def predict_values(self, input):
-        return self.model.predict(input)
+    @staticmethod
+    def k_fold_validation(X, Y, length_x, length_y):
+        dnn_model_val = DNNModel()
+        kf = KFold(n_splits=10)
+        scores = []
+        for train_index, test_index in kf.split(X):
+            print("TRAIN:", train_index, "TEST:", test_index)
+            model = dnn_model_val.create_model(length_x, length_y)
+            X_train, X_test = X[train_index], X[test_index]
+            Y_train, Y_test = Y[train_index], Y[test_index]
+            model.fit(X_train, Y_train, epochs=3, batch_size=512)
+            scores.append(model.evaluate(X_test, Y_test))
 
+        return scores

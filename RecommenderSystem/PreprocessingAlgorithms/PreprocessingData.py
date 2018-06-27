@@ -1,5 +1,5 @@
-from preprocessing.helpers.JsonProcessor import JsonProcessor
-from preprocessing.dataAlgorithms.NormalizePersona import NormalizePersona
+from RecommenderSystem.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
+from RecommenderSystem.DataAlgorithms.NormalizePersona import NormalizePersona
 import pandas as pd
 import numpy as np
 
@@ -70,7 +70,7 @@ class PreprocessingData:
         self.list_audience = list_audience
         audience_table = self.create_table(list_audience, sortedData, 'audience_terms')
         sortedData = pd.concat([sortedData, audience_table, categories_table], axis=1)
-        sortedData = sortedData.drop(columns=['transactionPath', 'userAgent', 'audience_terms'])
+        sortedData = sortedData.drop(columns=['transactionPath', 'audience_terms'])
         sortedData.to_json(file_name)
 
         return items_table
@@ -79,17 +79,6 @@ class PreprocessingData:
     def run_preprocessing(self, name_file):
 
         sortedData = self.json_tools.do_it_all(name_file)
-        # sortedData = json_Tools.do_it_all("./test_mb.json")
-        # sortedData.to_json("./test2_processed.json")
-
-        # sortedData = pd.read_json("./test2_processed_personas.json")
-        # sortedData = sortedData.reset_index(drop=True)
-        # sortedData = sortedData.drop(columns=['referer', 'audience.terms', 'categories.terms', 'userAgent', 'visitorId'])
-
         sortedData = NormalizePersona.normalize_table_personas(sortedData)
-        # sortedData.to_json("./test2_processed_personas.json")
-
-        # sortedData = pd.read_json("./test2_processed_personas.json")
-        # sortedData = sortedData.reset_index(drop=True)
 
         return sortedData
