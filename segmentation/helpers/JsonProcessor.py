@@ -19,7 +19,7 @@ class JsonProcessor:
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
         keep_list = ['visitorId', 'timestamp', 'pageUrl',
-                     'returningvisitor']
+                     'returningvisitor', 'pageId']
         processed_data = all_data[keep_list]
         print("Step 2/7 - Filtering, done...")
         return processed_data
@@ -48,19 +48,21 @@ class JsonProcessor:
 
     # Step 6
     # This step would require the login and home URLs to be provided by the user.
-    def remove_homepage_and_stringify(self, data_frame):
-        data_frame = data_frame.astype(str)
-        homepages = ["https://www.onehippo.com/en", "https://www.onehippo.org/",
-                     "http://www.onehippo.com/en", "https://www.onehippo.com/en/oh-dear",
-                     "https://www.onehippo.com/wp-login.php", "http://www.onehippo.org/wp-login.php",
-                     "https://www.onehippo.org/wp-login.php", "https://www.onehippo.com/de"]
-        for homepage in homepages:
-            data_frame = data_frame[data_frame.contentPage != homepage]
+    def remove_homepage(self, data_frame):
+        data_frame = data_frame.drop(
+            data_frame[(
+                        (data_frame.pageId == 'hst:pages/home') |
+                        (data_frame.pageId == 'hst:pages/pagenotfound')
+                       )
+                       &
+                       (data_frame.transactionPath.str.len() == 1)
+                       ].index).reset_index(drop=True)
         print("Step 6/7 - Remove visitors that only visited the homepage, done...")
         return data_frame
 
     # Step 7
     def cluster_data(self, data_frame, number_of_segments=10):
+        data_frame = data_frame.astype(str)
         kmodes_cao = KModes(n_clusters=number_of_segments, init='Cao', verbose=1)
         kmodes_cao.fit_predict(data_frame)
 
@@ -83,8 +85,8 @@ class JsonProcessor:
         data_frame = self.get_transactions(data_frame)
         data_frame = data_frame.drop('visitorId', axis=1)
         data_frame = self.get_content_page_and_keywords(data_frame)
-        data_frame = self.remove_homepage_and_stringify(data_frame)
-        data_frame = data_frame.drop(['transactionPath'], axis=1)
+        data_frame = self.remove_homepage(data_frame)
+        data_frame = data_frame.drop(['transactionPath', 'pageId'], axis=1)
         return data_frame
 
     # All steps
