@@ -3,9 +3,21 @@ from RecommenderSystem.PreprocessingAlgorithms.ReadingFiles import ReadingFiles 
 from RecommenderSystem.DataAlgorithms.CalculateSimilarity import CalculateSimilarity as cs
 from RecommenderSystem.NeuralNetwork.DNNModel import DNNModel
 import pandas as pd
+import numpy as np
 
 def useless_function(lst1):
-    return PreprocessingData.sublist(lst1, predicted_categories)
+    value = 0
+
+    for x in lst1:
+        if x in predicted_categories:
+            value = 1
+
+    if value == 1:
+        return lst1
+
+    else:
+        return []
+
 """
 uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
 
@@ -25,19 +37,80 @@ reading_files.query_to_json_file(query_result, 'entry',
 pre_data = PreprocessingData()
 dnn_model = DNNModel()
 
+#user_test = initial_table[initial_table['visitorId'] == '022321c9-3447-43f0-8bc7-0a21889328f3']
+#visitors = ['022321c9-3447-43f0-8bc7-0a21889328f3']
+#val_to_keep = user_test.categories.loc[496]
+#val_to_keep = str(val_to_keep)
+#initial_table = initial_table.drop([494,495,497,498,499,500,501,502,503,504,505,506,507,508,509,510])
+#initial_table = initial_table.reset_index(drop=True)
+#aux = processed_table[(processed_table['visitorId'] == visitors[0]) & (processed_table.astype(str)['categories'] != val_to_keep)]
+#processed_table = processed_table.drop(aux.index.tolist())
+#processed_table = processed_table.reset_index(drop=True)
+#actual_seen_items_list = PreprocessingData.create_list(user_test, 'transactionPath')
+#actual_seen_items_list = [x for x in actual_seen_items_list if x in items_table.pageUrl.unique().tolist()]
+#actual_seen_items_table = items_table.loc[items_table['pageUrl'].isin(actual_seen_items_list)][['pageUrl', 'categories_terms']]
+#
+
+
+#trans = [x for x in initial_table['transactionPath'] if len(ast.literal_eval(x)) < 2]
+#keep_values = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
+#result = initial_table[(initial_table.transactionPath.isin(trans))  & (~initial_table['pageId'].isin(keep_values))]
+#indexes = result.index.values.tolist()
+#initial_table = initial_table.drop(indexes)
+#initial_table = initial_table.reset_index(drop=True)
+
+
 #Process the data
-initial_table = pre_data.run_preprocessing("./bloomreach_targeting.json")
-visitors = ['3efb952b-21ef-4ebf-b307-cb32ac1eba51']
+url = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem/FilesToTest/bloomreach_targeting_50mb.json"
+url_no_trans = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem/FilesToTest/bloomreach_targeting_no_transactions_50mb.json"
+url_after_everything = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem/FilesToTest/bloomreach_targeting_everything_50mb.json"
+url_items_file = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem/FilesToTest/bloomreach_targeting_items_50mb.json"
+url_to_save = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem/FilesToTest/processed_bloomreach_targeting_50mb.json"
+"""
+pre_data.run_preprocessing(url, url_no_trans, url_after_everything)
 
 #Process the data to be acceptable by the DNN
-items_table = pre_data.preprocessing_DNN(initial_table, "./processed_bloomreach_targeting.json")
-processed_table = pd.read_json("processed_bloomreach_targeting.json")
+pre_data.preprocessing_DNN(url_no_trans, url_after_everything, url_items_file, url_to_save)
+"""
+
+initial_table = pd.read_json(url_to_save).reset_index(drop=True)
+items_table = pd.read_json(url_items_file).reset_index(drop=True)
+
+user_test = initial_table[initial_table['visitorId'] == '0e627f37-3fd8-4b31-93be-a0b2037592fa']
+#visitors = ['3efb952b-21ef-4ebf-b307-cb32ac1eba51']
+#visitors = ['022321c9-3447-43f0-8bc7-0a21889328f3']
+#visitors = ['05c457ab-9050-487f-a617-748ef8b3ed9c']
+#visitors = ['11bfd688-535a-4f63-9a6f-180bbca91cbe']
+visitors = ['0e627f37-3fd8-4b31-93be-a0b2037592fa']
+
+visitors_indexes = [5506, 5514, 5522, 5533, 5542, 5553, 5564, 5596, 5601, 5614, 5622, 5631]
+
+actual_seen_items_list = PreprocessingData.create_list(user_test, 'transactionPath')
+actual_seen_items_list = [x for x in actual_seen_items_list if x in items_table.pageUrl.unique().tolist()]
+actual_seen_items_table = items_table.loc[items_table['pageUrl'].isin(actual_seen_items_list)][['pageUrl', 'categories_terms']]
+
+val_to_keep = initial_table.transactionPath.loc[5574]
+#val_to_keep = initial_table.categories.loc[90]
+#val_to_keep = initial_table.transactionPath.loc[162]
+val_to_keep = str(val_to_keep)
+
+initial_table = initial_table.drop(visitors_indexes)
+#initial_table = initial_table.drop([91])
+#initial_table = initial_table.drop([154, 155, 156, 157, 158, 159, 160, 161, 163, 164, 165, 166])
+initial_table = initial_table.reset_index(drop=True)
+
+#pre_data.preprocessing_DNN(user_test, "./processed_user_test.json")
+#processed_table = pd.read_json("processed_bloomreach_targeting.json")
+#processed_table_test = pd.read_json("processed_user_test.json")
 
 #Data used to train the DNN
 X, Y, X_visitors, Y_visitors, users_table, visitors_table, categories_table, categories_table_visitors, sortedData = \
-    dnn_model.preprocess_data(processed_table, visitors)
+    dnn_model.preprocess_data(url_to_save, visitors, val_to_keep)
+#X_test, Y_test, X_visitors_test, Y_visitors_test, users_table_test, visitors_table_test, categories_table_test, categories_table_visitors_test, sortedData_test = \
+#    dnn_model.preprocess_data(processed_table_test, [])
 
-processed_table = processed_table.reset_index(drop=True)
+
+#processed_table = processed_table.reset_index(drop=True)
 list_categories = categories_table.columns.values.tolist()
 
 length_x = len(users_table.columns.values.tolist())
@@ -45,16 +118,24 @@ length_y = len(list_categories)
 
 dnn_model.create_model(length_x, length_y)
 
+
 #Training the DNN
 results, predictions, accuracy = dnn_model.train_model(X, Y, graphs=True)
 
+test_value_x = X_visitors[11]
+test_value_x = [test_value_x.tolist()]
+test_value_x = np.array(test_value_x)
 
-visitors_prediction = dnn_model.predict_values(X_visitors)
+test_value_y = Y_visitors[11]
+test_value_y = [test_value_y.tolist()]
+test_value_y = np.array(test_value_y)
+
+visitors_prediction = dnn_model.predict_values(test_value_x)
 
 visitors_prediction[visitors_prediction >= 0.5] = 1
 visitors_prediction[visitors_prediction < 0.5] = 0
 
-visitors_accuracy = DNNModel.calculate_accuracy(visitors_prediction, Y_visitors)
+visitors_accuracy = DNNModel.calculate_accuracy(visitors_prediction, test_value_y)
 
 #Turn the prediction into table
 visitors_prediction_table = pd.DataFrame(visitors_prediction)
@@ -102,6 +183,9 @@ final_result = sorted(cs.similarity_results(seen_items_tuples, filtered_items_tu
 final_result_items = [z for x, y, z in final_result]
 final_result_items = PreprocessingData.remove_duplicates(final_result_items)
 
+intersection = [x for x in final_result_items if x in actual_seen_items_list]
+indexes = [final_result_items.index(value) for value in intersection]
+
 #When testing with only one trasactionPath
 #test_value = visitors_table.loc[5].values.tolist()
 #test_value = [test_value]
@@ -119,20 +203,6 @@ final_result_items = PreprocessingData.remove_duplicates(final_result_items)
 # '022321c9-3447-43f0-8bc7-0a21889328f3'
 # 494 - 510 --> 497
 
-#user_test = initial_table[initial_table['visitorId'] == '022321c9-3447-43f0-8bc7-0a21889328f3']
-#visitors = ['022321c9-3447-43f0-8bc7-0a21889328f3']
-#initial_table = initial_table.drop([494,495,497,498,499,500,501,502,503,504,505,506,507,508,509,510])
-#initial_table = initial_table.reset_index(drop=True)
-#aux = processed_table[(processed_table['visitorId'] == visitors[0]) & (processed_table.astype(str)['categories'] != val_to_keep)]
-#processed_table = processed_table.drop(aux.index.tolist())
-#processed_table = processed_table.reset_index(drop=True)
-#actual_seen_items_list = PreprocessingData.create_list(user_test, 'transactionPath')
-#actual_seen_items_list = [x for x in actual_seen_items_list if x in items_table.pageUrl.unique().tolist()]
-#actual_seen_items_table = items_table.loc[items_table['pageUrl'].isin(actual_seen_items_list)][['pageUrl', 'categories_terms']]
-#
-#intersection = [x for x in final_result_items if x in actual_seen_items_list]
-#indexes = [final_result_items.index(value) for value in intersection]
-
 
 #percentage_sum = 0
 #percentage_result = []
@@ -140,4 +210,3 @@ final_result_items = PreprocessingData.remove_duplicates(final_result_items)
 #for item in final_result_items:
 #    percentage_sum = sum([x for x,y,z in final_result if z == item])
 #    percentage_result.append((percentage_sum, item))
-

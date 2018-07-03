@@ -15,6 +15,30 @@ class DNNModel:
         self.model = None
 
     @staticmethod
+    def shows_graphs(history):
+        loss = history.history['loss']
+        val_loss = history.history['val_loss']
+        epochs = range(1, len(loss) + 1)
+        plt.plot(epochs, loss, 'bo', label='Training loss')
+        plt.plot(epochs, val_loss, 'b', label='Validation loss')
+        plt.title('Training and validation loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
+
+        plt.clf()
+        acc = history.history['acc']
+        val_acc = history.history['val_acc']
+        plt.plot(epochs, acc, 'bo', label='Training acc')
+        plt.plot(epochs, val_acc, 'b', label='Validation acc')
+        plt.title('Training and validation accuracy')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+        plt.show()
+
+    @staticmethod
     def calculate_accuracy(predictions, test_data):
         value_results = pd.DataFrame(0, index=np.arange(len(test_data)), columns=["accuracy"])
         columns = [x for x in range(len(test_data[0]))]
@@ -35,21 +59,22 @@ class DNNModel:
         return (sum(accuracy_values) / len(accuracy_values))
 
     @staticmethod
-    def preprocess_data(data_to_process, visitors):
-        #data_to_process = pd.read_json(file)
+    def preprocess_data(file, visitors, transaction_to_keep):
+        data_to_process = pd.read_json(file)
 
         list_categories = PreprocessingData.create_list(data_to_process, 'categories')
         data_to_process = data_to_process.reset_index(drop=True)
 
         categories_table = data_to_process[list_categories]
-        data_to_process['null'] = data_to_process.null.apply(lambda x: x if pd.notna(x) else 0.0)
+        #data_to_process['null'] = data_to_process.null.apply(lambda x: x if pd.notna(x) else 0.0)
 
         # 1st step, turn columns into strings
         data_to_process['geo_city'] = data_to_process['geo_city'].astype(str)
         data_to_process['geo_continent'] = data_to_process['geo_continent'].astype(str)
         data_to_process['geo_country'] = data_to_process['geo_country'].astype(str)
 
-        list_indexes_visitor = data_to_process.index[data_to_process['visitorId'].isin(visitors)]
+        list_indexes_visitor = data_to_process.index[(data_to_process['visitorId'].isin(visitors)) &
+                                                     (data_to_process.astype(str)['transactionPath'] != transaction_to_keep)]
         categories_tables_visitors = categories_table.loc[list_indexes_visitor]
         categories_table = categories_table.drop(list_indexes_visitor)
         categories_table = categories_table.reset_index(drop=True)
@@ -57,10 +82,6 @@ class DNNModel:
         # 2nd step, chose the "labels"
         Y = categories_table.iloc[:, :].values
         Y_visitors = categories_tables_visitors.iloc[:, :].values
-
-        # 3rd step, drop the labels
-        list_categories.extend(['categories'])
-        data_to_process = data_to_process.drop(columns=list_categories)
 
         # 4th step, use one hot enconding on the table
         result_cities = pd.get_dummies(data_to_process['geo_city'])
@@ -73,14 +94,20 @@ class DNNModel:
         users_table = pd.concat([users_table, result_cities, result_continent, result_country, result_persona_id,
                                  result_global_persona_id], axis=1)
 
-        visitors_table = users_table[users_table['visitorId'].isin(visitors)]
-        users_table = users_table[~users_table['visitorId'].isin(visitors)]
+        visitors_table = users_table[(users_table['visitorId'].isin(visitors)) &
+                                     (users_table.astype(str)['transactionPath'] != transaction_to_keep)]
+        users_table = users_table.drop(visitors_table.index.values.tolist())
 
         visitors_table = visitors_table.drop(columns=['visitorId'])
         users_table = users_table.drop(columns=['visitorId'])
 
         visitors_table = visitors_table.reset_index(drop=True)
         users_table = users_table.reset_index(drop=True)
+
+        # 3rd step, drop the labels
+        list_categories.extend(['categories', 'transactionPath'])
+        users_table = users_table.drop(columns=list_categories)
+        visitors_table = visitors_table.drop(columns=list_categories)
 
         # 5th step, get the wanted input
         X = users_table.iloc[:, :].values
@@ -128,27 +155,7 @@ class DNNModel:
         final_result = DNNModel.calculate_accuracy(predictions, Y_test)
 
         if graphs:
-            loss = history.history['loss']
-            val_loss = history.history['val_loss']
-            epochs = range(1, len(loss) + 1)
-            plt.plot(epochs, loss, 'bo', label='Training loss')
-            plt.plot(epochs, val_loss, 'b', label='Validation loss')
-            plt.title('Training and validation loss')
-            plt.xlabel('Epochs')
-            plt.ylabel('Loss')
-            plt.legend()
-            plt.show()
-
-            plt.clf()
-            acc = history.history['acc']
-            val_acc = history.history['val_acc']
-            plt.plot(epochs, acc, 'bo', label='Training acc')
-            plt.plot(epochs, val_acc, 'b', label='Validation acc')
-            plt.title('Training and validation accuracy')
-            plt.xlabel('Epochs')
-            plt.ylabel('Accuracy')
-            plt.legend()
-            plt.show()
+            DNNModel.shows_graphs(history)
 
         return results, predictions, final_result
 
@@ -165,7 +172,7 @@ class DNNModel:
             model = dnn_model_val.create_model(length_x, length_y)
             X_train, X_test = X[train_index], X[test_index]
             Y_train, Y_test = Y[train_index], Y[test_index]
-            model.fit(X_train, Y_train, epochs=3, batch_size=512)
+            model.fit(X_train, Y_train, epochs=10, batch_size=512)
             scores.append(model.evaluate(X_test, Y_test))
 
         return scores

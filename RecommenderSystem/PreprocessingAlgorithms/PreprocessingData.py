@@ -48,37 +48,39 @@ class PreprocessingData:
             categories_table.loc[index, values] = 1
             i += 1
             if i % 100 == 0:
-                print("Progress:", round((i / visitor_length) * 100, 2), "%")
+                print("Progress Table:", round((i / visitor_length) * 100, 2), "%")
 
         return categories_table
 
-    def preprocessing_DNN(self, sortedData, file_name):
+    def preprocessing_DNN(self, file_no_trans, file_after_everything, items_file_name, file_name,):
 
-        items_table = self.json_tools.make_items_table()
-        items_table = items_table[pd.notna(items_table['categories_terms'])]
-        items_table = items_table[items_table.astype(str)['categories_terms'] != '[\'\']']
-        items_table = items_table.reset_index(drop=True)
+        table_no_trans = pd.read_json(file_no_trans).reset_index(drop=True)
+        #table_no_trans = table_no_trans[table_no_trans.astype(str)['categories_terms'] != 'None'].reset_index(drop=True)
+        sortedData = pd.read_json(file_after_everything).reset_index(drop=True)
+        items_table = JsonProcessor.make_items_table(table_no_trans)
+        items_table.to_json(items_file_name)
+        #items_table = items_table[pd.notna(items_table['categories_terms'])]
+        #items_table = items_table[items_table.astype(str)['categories_terms'] != '[\'\']']
+        #items_table = items_table.reset_index(drop=True)
         list_categories = self.create_list(items_table, 'categories_terms')
         self.list_categories = list_categories
-        sortedData = sortedData[pd.notna(sortedData['categories'])]
-        sortedData = sortedData.reset_index(drop=True)
+        #sortedData = sortedData[pd.notna(sortedData['categories'])]
         sortedData['categories'] = sortedData.categories.apply(self.useless_function)
-        sortedData = sortedData[sortedData.astype(str)['categories'] != '[]']
-        sortedData = sortedData.reset_index(drop=True)
+        sortedData = sortedData[sortedData.astype(str)['categories'] != '[]'].reset_index(drop=True)
+        #sortedData = sortedData.reset_index(drop=True)
         categories_table = self.create_table(list_categories, sortedData, 'categories')
-        list_audience = self.create_list(items_table, 'audience_terms')
-        self.list_audience = list_audience
-        audience_table = self.create_table(list_audience, sortedData, 'audience_terms')
-        sortedData = pd.concat([sortedData, audience_table, categories_table], axis=1)
-        sortedData = sortedData.drop(columns=['transactionPath', 'audience_terms'])
+        #list_audience = self.create_list(items_table, 'audience_terms')
+        #self.list_audience = list_audience
+        #audience_table = self.create_table(list_audience, sortedData, 'audience_terms')
+        sortedData = pd.concat([sortedData, categories_table], axis=1)
+        #sortedData = sortedData.drop(columns=['transactionPath'])
         sortedData.to_json(file_name)
 
-        return items_table
 
 
-    def run_preprocessing(self, name_file):
+    def run_preprocessing(self, name_file, file_to_save, file_after_everything):
 
-        sortedData = self.json_tools.do_it_all(name_file)
+        sortedData = self.json_tools.do_it_all(name_file, file_to_save)
         sortedData = NormalizePersona.normalize_table_personas(sortedData)
+        sortedData.to_json(file_after_everything)
 
-        return sortedData
