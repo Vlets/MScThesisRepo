@@ -59,31 +59,14 @@ class DNNModel:
         return (sum(accuracy_values) / len(accuracy_values))
 
     @staticmethod
-    def preprocess_data(file, visitors, transaction_to_keep):
-        data_to_process = pd.read_json(file)
+    def preprocess_data(initial_table, user_test, list_categories):
+        user_test_size = len(user_test)
 
-        list_categories = PreprocessingData.create_list(data_to_process, 'categories')
-        data_to_process = data_to_process.reset_index(drop=True)
+        data_to_process = pd.concat([initial_table, user_test], ignore_index=True)
 
         categories_table = data_to_process[list_categories]
-        #data_to_process['null'] = data_to_process.null.apply(lambda x: x if pd.notna(x) else 0.0)
 
-        # 1st step, turn columns into strings
-        data_to_process['geo_city'] = data_to_process['geo_city'].astype(str)
-        data_to_process['geo_continent'] = data_to_process['geo_continent'].astype(str)
-        data_to_process['geo_country'] = data_to_process['geo_country'].astype(str)
-
-        list_indexes_visitor = data_to_process.index[(data_to_process['visitorId'].isin(visitors)) &
-                                                     (data_to_process.astype(str)['transactionPath'] != transaction_to_keep)]
-        categories_tables_visitors = categories_table.loc[list_indexes_visitor]
-        categories_table = categories_table.drop(list_indexes_visitor)
-        categories_table = categories_table.reset_index(drop=True)
-
-        # 2nd step, chose the "labels"
-        Y = categories_table.iloc[:, :].values
-        Y_visitors = categories_tables_visitors.iloc[:, :].values
-
-        # 4th step, use one hot enconding on the table
+        # 1st step, use one hot enconding on the table
         result_cities = pd.get_dummies(data_to_process['geo_city'])
         result_continent = pd.get_dummies(data_to_process['geo_continent'])
         result_country = pd.get_dummies(data_to_process['geo_country'])
@@ -94,26 +77,32 @@ class DNNModel:
         users_table = pd.concat([users_table, result_cities, result_continent, result_country, result_persona_id,
                                  result_global_persona_id], axis=1)
 
-        visitors_table = users_table[(users_table['visitorId'].isin(visitors)) &
-                                     (users_table.astype(str)['transactionPath'] != transaction_to_keep)]
-        users_table = users_table.drop(visitors_table.index.values.tolist())
+        # 2nd step, drop the labels
+        to_drop = list_categories
+        to_drop.extend(['categories', 'transactionPath', 'visitorId'])
+        users_table = users_table.drop(columns=to_drop)
 
-        visitors_table = visitors_table.drop(columns=['visitorId'])
-        users_table = users_table.drop(columns=['visitorId'])
+        # 3rd step, separate the unwanted rows to a new users table
+        user_test_data = users_table.tail(user_test_size)
 
-        visitors_table = visitors_table.reset_index(drop=True)
-        users_table = users_table.reset_index(drop=True)
+        # 4th step, separate the unwanted rows to a new categories table
+        user_test_categories = categories_table.tail(user_test_size)
 
-        # 3rd step, drop the labels
-        list_categories.extend(['categories', 'transactionPath'])
-        users_table = users_table.drop(columns=list_categories)
-        visitors_table = visitors_table.drop(columns=list_categories)
+        # 5th step, remove the unwanted rows from the whole users data table
+        users_table = users_table.drop(user_test_data.index.values.tolist())
 
-        # 5th step, get the wanted input
+        # 6th step, remove the unwanted rows from the whole categories table
+        categories_table = categories_table.drop(user_test_categories.index.values.tolist())
+
+        # 7th step, get the wanted input
         X = users_table.iloc[:, :].values
-        X_visitors = visitors_table.iloc[:, :].values
+        X_visitors = user_test_data.iloc[:, :].values
 
-        return X, Y, X_visitors, Y_visitors, users_table, visitors_table, categories_table, categories_tables_visitors, data_to_process
+        # 8nd step, get the wanted labels
+        Y = categories_table.iloc[:, :].values
+        Y_visitors = user_test_categories.iloc[:, :].values
+
+        return X, Y, X_visitors, Y_visitors, users_table, categories_table, data_to_process
 
     def create_model(self, length_x, length_y):
         model = Sequential()
@@ -128,39 +117,18 @@ class DNNModel:
     def train_model(self, X, Y, graphs=False):
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
 
-        # X_val = X_train[:8982]
-        # partial_x_train = X_train[8982:]
-
-        # Y_val = Y_train[:8982]
-        # partial_y_test = Y_train[8982:]
-
-        X_val = X_train[:1000]
-        partial_x_train = X_train[1000:]
-
-        Y_val = Y_train[:1000]
-        partial_y_train = Y_train[1000:]
-
-        history = self.model.fit(partial_x_train,
-                                 partial_y_train,
-                                 epochs=10,
-                                 batch_size=512,
-                                 validation_data=(X_val, Y_val))
-
-        results = self.model.evaluate(X_test, Y_test)
-
-        predictions = self.model.predict(X_test)
-        predictions[predictions >= 0.5] = 1
-        predictions[predictions < 0.5] = 0
-
-        final_result = DNNModel.calculate_accuracy(predictions, Y_test)
+        history = self.model.fit(X_train, Y_train, epochs=4, batch_size=512, validation_data=(X_test, Y_test))
 
         if graphs:
             DNNModel.shows_graphs(history)
 
-        return results, predictions, final_result
 
     def predict_values(self, input_x):
-        return self.model.predict(input_x)
+        prediction = self.model.predict(input_x)
+        prediction[prediction >= 0.5] = 1
+        prediction[prediction < 0.5] = 0
+
+        return prediction
 
     @staticmethod
     def k_fold_validation(X, Y, length_x, length_y):
@@ -172,7 +140,7 @@ class DNNModel:
             model = dnn_model_val.create_model(length_x, length_y)
             X_train, X_test = X[train_index], X[test_index]
             Y_train, Y_test = Y[train_index], Y[test_index]
-            model.fit(X_train, Y_train, epochs=10, batch_size=512)
+            model.fit(X_train, Y_train, epochs=4, batch_size=512)
             scores.append(model.evaluate(X_test, Y_test))
 
         return scores
