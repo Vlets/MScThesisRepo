@@ -26,6 +26,8 @@ def get_keywords(url):
     sw.add('de')
     sw.add('txt')
     sw.add('oh')
+    sw.add('net')
+    sw.add('com')
     sw.add('1')
     sw.add('login')
     sw.remove('about')
