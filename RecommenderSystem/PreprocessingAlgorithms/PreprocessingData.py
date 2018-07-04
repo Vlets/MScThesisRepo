@@ -55,23 +55,14 @@ class PreprocessingData:
     def preprocessing_DNN(self, file_no_trans, file_after_everything, items_file_name, file_name,):
 
         table_no_trans = pd.read_json(file_no_trans).reset_index(drop=True)
-        #table_no_trans = table_no_trans[table_no_trans.astype(str)['categories_terms'] != 'None'].reset_index(drop=True)
         sortedData = pd.read_json(file_after_everything).reset_index(drop=True)
         items_table = JsonProcessor.make_items_table(table_no_trans)
         items_table.to_json(items_file_name)
-        #items_table = items_table[pd.notna(items_table['categories_terms'])]
-        #items_table = items_table[items_table.astype(str)['categories_terms'] != '[\'\']']
-        #items_table = items_table.reset_index(drop=True)
         list_categories = self.create_list(items_table, 'categories_terms')
         self.list_categories = list_categories
-        #sortedData = sortedData[pd.notna(sortedData['categories'])]
         sortedData['categories'] = sortedData.categories.apply(self.useless_function)
         sortedData = sortedData[sortedData.astype(str)['categories'] != '[]'].reset_index(drop=True)
-        #sortedData = sortedData.reset_index(drop=True)
         categories_table = self.create_table(list_categories, sortedData, 'categories')
-        #list_audience = self.create_list(items_table, 'audience_terms')
-        #self.list_audience = list_audience
-        #audience_table = self.create_table(list_audience, sortedData, 'audience_terms')
         sortedData = pd.concat([sortedData, categories_table], axis=1)
         #sortedData = sortedData.drop(columns=['transactionPath'])
         sortedData.to_json(file_name)
