@@ -71,14 +71,16 @@ list_categories = PreprocessingData.create_list(items_table, 'categories_terms')
 
 user_test = initial_table[initial_table['visitorId'] == '2da0f833-c9a8-41fa-86d5-bb179633b87a']
 # user_test = user_test.drop(5574)
-user_test = user_test.drop(2006) # --> 20mb
+# user_test = user_test.drop(2006) # --> 20mb
+user_test = user_test.drop(2094) # --> 20mb with change
 # user_test = user_test.drop(1756) # --> 50mb
 # user_test = user_test.drop(2090) # --> 30mb
 # user_test = user_test.drop(2445)
 visitor = '2da0f833-c9a8-41fa-86d5-bb179633b87a' # --> 20mb with no change
 
 # visitor_indexes = [5506, 5514, 5522, 5533, 5542, 5553, 5564, 5596, 5601, 5614, 5622, 5631]
-visitor_indexes = [2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016, 2017, 2018, 2019] # --> 20mb
+# visitor_indexes = [2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016, 2017, 2018, 2019] # --> 20mb
+visitor_indexes = [2095, 2096, 2097, 2098, 2099, 2100, 2102, 2103, 2104, 2105, 2106, 2107] # --> 20mb with change
 # visitor_indexes = [1759, 1760, 1761, 1762, 1763, 1764, 1765, 1766, 1767, 1769, 1771, 1772] # --> 50mb
 # visitor_indexes = [2101, 2113, 2124, 2135, 2157, 2168, 2179, 2190, 2201, 2212, 2225, 2236] # --> 30mb
 # visitor_indexes = [2448, 2449, 2450, 2451, 2452, 2453, 2454, 2455, 2456, 2457, 2459, 2460]

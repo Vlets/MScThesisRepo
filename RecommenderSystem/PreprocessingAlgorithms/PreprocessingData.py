@@ -7,6 +7,7 @@ import numpy as np
 class PreprocessingData:
 
     def __init__(self):
+        self.items_table = None
         self.list_categories = None
         self.list_audience = None
         self.json_tools = JsonProcessor()
@@ -27,16 +28,17 @@ class PreprocessingData:
         return categories
 
     @staticmethod
-    def sublist(lst1, lst2):
-        ls1 = [element for element in lst1 if element in lst2]
+    def has_seen_items(path, items_table):
+        result = items_table.loc[items_table['pageUrl'].isin(path)]
 
-        if len(ls1) == len(lst1):
-            return lst1
-        else:
+        if result.empty:
             return []
 
+        else:
+            return path
+
     def useless_function(self, lst1):
-        return PreprocessingData.sublist(lst1, self.list_categories)
+        return PreprocessingData.has_seen_items(lst1, self.items_table)
 
     @staticmethod
     def create_table(list_categories, items_table, column):
@@ -45,6 +47,7 @@ class PreprocessingData:
         visitor_length = len(items_table)
         for index, row in items_table.iterrows():
             values = row[column]
+            values = [x for x in values if x in list_categories]
             categories_table.loc[index, values] = 1
             i += 1
             if i % 100 == 0:
@@ -57,11 +60,12 @@ class PreprocessingData:
         table_no_trans = pd.read_json(file_no_trans).reset_index(drop=True)
         sortedData = pd.read_json(file_after_everything).reset_index(drop=True)
         items_table = JsonProcessor.make_items_table(table_no_trans)
+        self.items_table = items_table
         items_table.to_json(items_file_name)
         list_categories = self.create_list(items_table, 'categories_terms')
         self.list_categories = list_categories
-        sortedData['categories'] = sortedData.categories.apply(self.useless_function)
-        sortedData = sortedData[sortedData.astype(str)['categories'] != '[]'].reset_index(drop=True)
+        sortedData['transactionPath'] = sortedData.transactionPath.apply(self.useless_function)
+        sortedData = sortedData[sortedData.astype(str)['transactionPath'] != '[]'].reset_index(drop=True)
         categories_table = self.create_table(list_categories, sortedData, 'categories')
         sortedData = pd.concat([sortedData, categories_table], axis=1)
         #sortedData = sortedData.drop(columns=['transactionPath'])

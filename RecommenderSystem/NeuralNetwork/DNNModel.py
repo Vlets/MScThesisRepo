@@ -125,8 +125,8 @@ class DNNModel:
 
     def predict_values(self, input_x):
         prediction = self.model.predict(input_x)
-        prediction[prediction >= 0.5] = 1
-        prediction[prediction < 0.5] = 0
+        #prediction[prediction >= 0.5] = 1
+        #prediction[prediction < 0.5] = 0
 
         return prediction
 
