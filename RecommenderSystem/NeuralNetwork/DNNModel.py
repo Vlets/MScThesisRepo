@@ -76,7 +76,6 @@ class DNNModel:
                                                     'globalPersonaIdScores_id'])
         users_table = pd.concat([users_table, result_cities, result_continent, result_country, result_persona_id,
                                  result_global_persona_id], axis=1)
-        #
 
         # 2nd step, drop the labels
         to_drop = list_categories
@@ -107,8 +106,8 @@ class DNNModel:
 
     def create_model(self, length_x, length_y):
         model = Sequential()
-        model.add(Dense(64, activation='relu', input_shape=(length_x,)))
-        model.add(Dense(16, activation='relu'))
+        model.add(Dense(32, activation='relu', input_shape=(length_x,)))
+        model.add(Dense(32, activation='relu'))
         model.add(Dense(length_y, activation='sigmoid'))
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         self.model = model
@@ -126,8 +125,8 @@ class DNNModel:
 
     def predict_values(self, input_x):
         prediction = self.model.predict(input_x)
-        prediction[prediction >= 0.5] = 1
-        prediction[prediction < 0.5] = 0
+        #prediction[prediction >= 0.5] = 1
+        #prediction[prediction < 0.5] = 0
 
         return prediction
 

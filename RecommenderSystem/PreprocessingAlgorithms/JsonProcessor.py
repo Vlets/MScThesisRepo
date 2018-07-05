@@ -35,8 +35,8 @@ class JsonProcessor:
         print("Step 2/7 - Filtering, done...")
         return processed_data
 
-    @staticmethod
-    def remove_homepage_and_stringify(data_frame):
+
+    def remove_homepage_and_stringify(self, data_frame):
         trans = [str(x) for x in data_frame['transactionPath'] if len(x) < 2]
         keep_values = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
         result = data_frame[
