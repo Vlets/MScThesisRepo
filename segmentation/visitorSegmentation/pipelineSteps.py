@@ -1,11 +1,11 @@
 import pandas as pd
 from kmodes.kmodes import KModes
 from pandas.io.json import json_normalize
-from segmentation.helpers import urlKeywordExtractor as urlExtract
+from segmentation.visitorSegmentation import urlKeywordExtractor as urlExtract
 from segmentation.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 
 
-class JsonProcessor:
+class VisitorSegmentationPipeline:
 
     # Step 1
     def json_read(self, filepath, multiline=False):

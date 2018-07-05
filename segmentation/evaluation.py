@@ -2,14 +2,14 @@ import time
 import pandas as pd
 from kmodes.kmodes import KModes
 from sklearn.metrics import silhouette_score, silhouette_samples
-from segmentation.helpers.JsonProcessor import JsonProcessor
-from segmentation.helpers import urlKeywordExtractor as urlExtract
+from segmentation.visitorSegmentation.pipelineSteps import VisitorSegmentationPipeline
+from segmentation.visitorSegmentation import urlKeywordExtractor as urlExtract
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 
-jsonTools = JsonProcessor()
+jsonTools = VisitorSegmentationPipeline()
 
 filePath = "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/test2.json"
 bigData = "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/bigdata.json"

@@ -1,6 +1,6 @@
-from segmentation.helpers.JsonProcessor import JsonProcessor
+from segmentation.visitorSegmentation.pipelineSteps import VisitorSegmentationPipeline
 
-jsonTools = JsonProcessor()
+jsonTools = VisitorSegmentationPipeline()
 
 filePath = "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/test2.json"
 bigData = "/Users/george/PycharmProjects/scikitLiterallyLearn/segmentation/dataFiles/bigdata.json"

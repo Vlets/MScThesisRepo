@@ -2,13 +2,13 @@ import unittest
 import pandas as pd
 import segmentation.dataFiles.mockData as dataFiles
 from segmentation.dataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
-from segmentation.helpers.JsonProcessor import JsonProcessor
+from segmentation.visitorSegmentation.pipelineSteps import VisitorSegmentationPipeline
 
 
 # Maximal Forward Reference algorithm will be referred to as: MFA or mfa
 
 class UnitTests(unittest.TestCase):
-    jsonTools = JsonProcessor()
+    jsonTools = VisitorSegmentationPipeline()
     goodData = dataFiles.mockData
     badData = dataFiles.mockData2
     goodReorderedData = dataFiles.mockDataReordered
