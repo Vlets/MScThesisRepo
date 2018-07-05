@@ -7,11 +7,20 @@ from pandas.io.json import json_normalize
 from RecommenderSystem.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 
 
+
 class JsonProcessor:
 
     def __init__(self):
         self.file = None
         self.list_pageid = []
+
+    @staticmethod
+    def remove_duplicates(duplicate):
+        final_list = []
+        for num in duplicate:
+            if num not in final_list:
+                final_list.append(num)
+        return final_list
 
     @staticmethod
     def json_read(filepath, multiline=False):
@@ -35,11 +44,6 @@ class JsonProcessor:
         print("Step 2/7 - Filtering, done...")
         return processed_data
 
-    def get_content_page_and_keywords(self, data_frame):
-        data_frame['keywords'] = data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
-        #data_frame['contentPage'] = data_frame.transactionPath.str[-1]
-        print("Step 5/7 - Keep content pages and get path keywords, done...")
-        return data_frame
 
     def remove_homepage_and_stringify(self, data_frame):
         trans = [str(x) for x in data_frame['transactionPath'] if len(x) < 2]
@@ -60,9 +64,9 @@ class JsonProcessor:
         keep_columns = ['pageUrl', 'categories_terms']
         items_table = table.loc[table['pageId'].isin(keep_values)]
         items_table = items_table[keep_columns]
-        items_table['categories_terms'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
-        #items_table = JsonProcessor.join_categories_keywords(items_table, 'categories_terms')
-        #items_table = items_table.drop(['keywords'], axis=1)
+        items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
+        items_table = JsonProcessor.join_categories_keywords(items_table, 'categories_terms')
+        items_table = items_table.drop(['keywords'], axis=1)
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 
     def read_and_sort_data(self, file_path):
@@ -109,11 +113,11 @@ class JsonProcessor:
         transaction_dataframe = pd.DataFrame(transactions,
                                              columns=['visitorId', 'timestamp', 'transactionPath', 'categories'])
         final_data_frame = pd.merge(transaction_dataframe, sorted_data, on=['visitorId', 'timestamp'])
-        final_data_frame['categories'] = final_data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
+        final_data_frame['keywords'] = final_data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
         final_data_frame = self.remove_homepage_and_stringify(final_data_frame)
-        #final_data_frame = JsonProcessor.join_categories_keywords(final_data_frame, 'categories')
+        final_data_frame = JsonProcessor.join_categories_keywords(final_data_frame, 'categories')
 
-        return final_data_frame.drop(['timestamp', 'pageUrl', 'categories_terms', 'pageId'], axis=1)
+        return final_data_frame.drop(['timestamp', 'pageUrl', 'categories_terms', 'pageId', 'keywords'], axis=1)
 
     @staticmethod
     def json_save(sorted_data, savepath, to_json=True):
