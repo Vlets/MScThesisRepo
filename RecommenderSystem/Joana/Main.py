@@ -24,8 +24,6 @@ reading_files.query_to_json_file(query_result, 'entry',
 
 
 def to_filter_function(lst1):
-    #return PreprocessingData.sublist(lst1, predicted_categories)
-
     ls1 = [element for element in lst1 if element in predicted_categories]
     ls2 = [element for element in predicted_categories if element in lst1]
 
@@ -35,17 +33,12 @@ def to_filter_function(lst1):
     else:
         return []
 
-    # value = 0
+def get_seen_items(table, items_table):
+    list = PreprocessingData.create_list(table, 'transactionPath')
+    list = [x for x in list if x in items_table.pageUrl.unique().tolist()]
+    table_result = items_table.loc[items_table['pageUrl'].isin(list)][['pageUrl', 'categories_terms']]
 
-    # for x in lst1:
-    #    if x in predicted_categories:
-    #        value = 1
-
-    # if value == 1:
-    #    return lst1
-
-    # else:
-    #    return []
+    return table_result
 
 
 pre_data = PreprocessingData()
@@ -71,27 +64,21 @@ list_categories = PreprocessingData.create_list(items_table, 'categories_terms')
 
 user_test = initial_table[initial_table['visitorId'] == '2da0f833-c9a8-41fa-86d5-bb179633b87a']
 # user_test = user_test.drop(5574)
-# user_test = user_test.drop(2006) # --> 20mb
-user_test = user_test.drop(2094) # --> 20mb with change
+user_test = user_test.drop(2094) # --> 20mb
 # user_test = user_test.drop(1756) # --> 50mb
 # user_test = user_test.drop(2090) # --> 30mb
 # user_test = user_test.drop(2445)
 visitor = '2da0f833-c9a8-41fa-86d5-bb179633b87a' # --> 20mb with no change
 
 # visitor_indexes = [5506, 5514, 5522, 5533, 5542, 5553, 5564, 5596, 5601, 5614, 5622, 5631]
-# visitor_indexes = [2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016, 2017, 2018, 2019] # --> 20mb
-visitor_indexes = [2095, 2096, 2097, 2098, 2099, 2100, 2102, 2103, 2104, 2105, 2106, 2107] # --> 20mb with change
+visitor_indexes = [2095, 2096, 2097, 2098, 2099, 2100, 2102, 2103, 2104, 2105, 2106, 2107] # --> 20mb
 # visitor_indexes = [1759, 1760, 1761, 1762, 1763, 1764, 1765, 1766, 1767, 1769, 1771, 1772] # --> 50mb
 # visitor_indexes = [2101, 2113, 2124, 2135, 2157, 2168, 2179, 2190, 2201, 2212, 2225, 2236] # --> 30mb
 # visitor_indexes = [2448, 2449, 2450, 2451, 2452, 2453, 2454, 2455, 2456, 2457, 2459, 2460]
 
-actual_seen_items_list = PreprocessingData.create_list(user_test, 'transactionPath')
-actual_seen_items_list = [x for x in actual_seen_items_list if x in items_table.pageUrl.unique().tolist()]
-actual_seen_items_table = items_table.loc[items_table['pageUrl'].isin(actual_seen_items_list)][
-    ['pageUrl', 'categories_terms']]
+actual_seen_items_list = get_seen_items(user_test, items_table)
 
-initial_table = initial_table.drop(visitor_indexes)
-initial_table = initial_table.reset_index(drop=True)
+initial_table = initial_table.drop(visitor_indexes).reset_index(drop=True)
 
 # Data used to train the DNN
 X, Y, X_visitors, Y_visitors, users_table, categories_table, sortedData = \
@@ -124,20 +111,15 @@ predicted_indexes = result_visitors.columns.values.tolist()
 predicted_categories = [list_categories[x] for x in predicted_indexes]
 
 # Get table with items that have the categories found previously
-filtered_items = items_table
+filtered_items = items_table.copy()
 filtered_items['categories_terms'] = filtered_items.categories_terms.apply(to_filter_function)
-filtered_items = filtered_items[filtered_items.astype(str)['categories_terms'] != '[]']
-filtered_items = filtered_items.reset_index(drop=True)
+filtered_items = filtered_items[filtered_items.astype(str)['categories_terms'] != '[]'].reset_index(drop=True)
 
 # Get visitor past viewed items
 visitors_table_path = initial_table.loc[initial_table['visitorId'] == visitor]
-list_seen_items = PreprocessingData.create_list(visitors_table_path, 'transactionPath')
-list_seen_items = [x for x in list_seen_items if x in items_table.pageUrl.unique().tolist()]
-table_seen_items = items_table.loc[items_table['pageUrl'].isin(list_seen_items)][['pageUrl', 'categories_terms']]
+table_seen_items = get_seen_items(visitors_table_path, items_table).reset_index(drop=True)
 
 # Remove the seen items in filtered_items
-table_seen_items = table_seen_items.reset_index(drop=True)
-filtered_items = filtered_items.reset_index(drop=True)
 filtered_items = filtered_items[(~filtered_items.pageUrl.isin(table_seen_items))]
 
 # Turn categories_terms into strings
