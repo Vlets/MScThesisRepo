@@ -1,15 +1,6 @@
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
-
-
-def remove_duplicates(duplicate):
-    final_list = []
-    for num in duplicate:
-        if num not in final_list:
-            final_list.append(num)
-    return final_list
-
 #homepage = 'https://www.onehippo.org/'
 #homepage2 = 'https://www.onehippo.com/'
 #homepage3 = 'http://www.onehippo.com/'
@@ -48,4 +39,4 @@ def get_keywords(url, items=False):
     sw.remove('about')
     sw.remove('why')
     result = [w for w in path_tokens if w not in sw]
-    return remove_duplicates(list(result))
+    return list(result)

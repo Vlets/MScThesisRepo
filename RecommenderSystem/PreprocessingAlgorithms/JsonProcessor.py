@@ -35,6 +35,11 @@ class JsonProcessor:
         print("Step 2/7 - Filtering, done...")
         return processed_data
 
+    def get_content_page_and_keywords(self, data_frame):
+        data_frame['keywords'] = data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
+        #data_frame['contentPage'] = data_frame.transactionPath.str[-1]
+        print("Step 5/7 - Keep content pages and get path keywords, done...")
+        return data_frame
 
     def remove_homepage_and_stringify(self, data_frame):
         trans = [str(x) for x in data_frame['transactionPath'] if len(x) < 2]
