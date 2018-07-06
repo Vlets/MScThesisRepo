@@ -4,54 +4,53 @@ import pandas as pd
 class MFAlgorithm:
 
     @staticmethod
-    def run_MF_algorithm(visitor, time, path):
-        tuples = [('', path[0], 0, 0)]
+    def run_MF_algorithm(visitor, time, urls):
+        url_pairs = [('', urls[0], 0, 0)]
         i = 0
-        length = len(path)
-        while (i + 1) < length:
-            tuples.append((path[i], path[i + 1], i, i + 1))
+        number_of_urls = len(urls)
+        while (i + 1) < number_of_urls:
+            url_pairs.append((urls[i], urls[i + 1], i, i + 1))
             i += 1
 
         i = 0
-        string = []
-        flag = 1
-        result = []
+        end_transaction = False
+        all_transactions = []
+        current_transaction = []
         timestamp = time[0]
-        length_tuples = len(tuples)
+        number_of_pairs = len(url_pairs)
 
-        while i < length_tuples:
-            varA, varB, indexA, indexB = tuples[i]
+        while i < number_of_pairs:
+            current_url, next_url, index_current, index_next = url_pairs[i]
 
-            if varA == '':
-                if string:
-                    if string not in result:
-                        result.append((visitor, timestamp, string))
-                string.append(varB)
-                timestamp = time[indexB]
+            # Initialize the transaction for the first URL
+            if current_url == '':
+                current_transaction.append(next_url)
+                timestamp = time[index_next]
                 i += 1
                 continue
 
-            if varB in string:
-                if flag == 1:
-                    if string not in result:
-                        result.append((visitor, timestamp, string))
-                index = string.index(varB)
-                string = string[0:index + 1]
-                flag = 0
+            # If the URL exists in the transaction, end transaction and add it to list.
+            # If not, we add the url to the transaction list and go on.
+            if next_url in current_transaction:
+                if not end_transaction:
+                    if current_transaction not in all_transactions:
+                        all_transactions.append((visitor, timestamp, current_transaction))
+                this_index = current_transaction.index(next_url)
+                current_transaction = current_transaction[0:this_index + 1]
+                end_transaction = True
                 i += 1
                 continue
-
             else:
-                if flag == 0:
-                    flag = 1
-                    timestamp = time[indexA]
-                string.append(varB)
+                if end_transaction:
+                    end_transaction = False
+                    timestamp = time[index_current]
+                current_transaction.append(next_url)
 
             i += 1
 
-        if string not in result:
-            result.append((visitor, timestamp, string))
-        return result
+        if current_transaction not in all_transactions:
+            all_transactions.append((visitor, timestamp, current_transaction))
+        return all_transactions
 
     @staticmethod
     def init_algorithm(sortedData):
