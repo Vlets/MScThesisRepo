@@ -19,7 +19,7 @@ class PreprocessingData:
         return final_list
 
     @staticmethod
-    def create_list(given_table, column_name):
+    def create_list_all_possible_values(given_table, column_name):
         """
 
         :param given_table:
@@ -47,7 +47,7 @@ class PreprocessingData:
         else:
             return path
 
-    def useless_function(self, lst1):
+    def to_apply_has_seen_items_function(self, lst1):
         """
 
         :param lst1:
@@ -56,7 +56,7 @@ class PreprocessingData:
         return PreprocessingData.has_seen_items(lst1, self.items_table)
 
     @staticmethod
-    def create_table(values_list, given_table, column_name):
+    def create_one_hot_encoding_table(values_list, given_table, column_name):
         """
 
         :param values_list:
@@ -77,8 +77,8 @@ class PreprocessingData:
 
         return categories_table
 
-    def create_items_table_and_add_transactionPath(self, file_no_transactions, file_after_processing, items_file_name,
-                                                   file_path_to_save):
+    def create_items_table_and_add_paths(self, file_no_transactions, file_after_processing, items_file_name,
+                                         file_path_to_save):
         """
 
         :param file_no_transactions:
@@ -92,14 +92,14 @@ class PreprocessingData:
         items_table = JsonProcessor.make_items_table(table_no_trans)
         self.items_table = items_table
         items_table.to_json(items_file_name)
-        list_categories = self.create_list(items_table, 'categories_terms')
-        sortedData['transactionPath'] = sortedData.transactionPath.apply(self.useless_function)
+        list_categories = self.create_list_all_possible_values(items_table, 'categories_terms')
+        sortedData['transactionPath'] = sortedData.transactionPath.apply(self.to_apply_has_seen_items_function)
         sortedData = sortedData[sortedData.astype(str)['transactionPath'] != '[]'].reset_index(drop=True)
-        categories_table = self.create_table(list_categories, sortedData, 'categories')
+        categories_table = self.create_one_hot_encoding_table(list_categories, sortedData, 'categories')
         sortedData = pd.concat([sortedData, categories_table], axis=1)
         sortedData.to_json(file_path_to_save)
 
-    def run_preprocessing(self, name_file, file_to_save, file_after_everything):
+    def json_files_preprocess(self, name_file, file_to_save, file_after_everything):
         """
 
         :param name_file:
@@ -107,6 +107,6 @@ class PreprocessingData:
         :param file_after_everything:
         :return:
         """
-        sortedData = self.json_tools.do_it_all(name_file, file_to_save)
+        sortedData = self.json_tools.json_files_pre_processing(name_file, file_to_save)
         sortedData = NormalizePersona.normalize_table_personas(sortedData)
         sortedData.to_json(file_after_everything)

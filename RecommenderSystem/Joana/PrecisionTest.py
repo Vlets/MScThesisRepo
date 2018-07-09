@@ -1,5 +1,5 @@
 from RecommenderSystem.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
-from RecommenderSystem.Joana.Main import Main
+from RecommenderSystem.Joana.Recommender_System_Main import Recommender_System_Main
 import pandas as pd
 
 # Process the data
@@ -34,13 +34,13 @@ pre_data.run_preprocessing(url, url_no_trans, url_after_everything)
 pre_data.create_items_table_and_add_transactionPath(url_no_trans, url_after_everything, url_items_file, url_to_save)
 """
 
-main = Main()
+main = Recommender_System_Main()
 
 initial_table = pd.read_json(url_to_save).reset_index(drop=True)
 initial_table = NN_format_preprocess(initial_table)
 items_table = pd.read_json(url_items_file).reset_index(drop=True)
 
-list_keywords = PreprocessingData.create_list(items_table, 'categories_terms')
+list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'categories_terms')
 
 groups = initial_table.groupby('visitorId').count()
 

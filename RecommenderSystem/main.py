@@ -10,7 +10,7 @@ filePath = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/RecommenderSystem
 # THE ONE FUNCTION TO RULE THEM ALL IS do_it_all(filePath)
 
 start = time.time()
-final_dataframe = jsonTools.do_it_all(filePath)
+final_dataframe = jsonTools.json_files_pre_processing(filePath)
 end = time.time()
 
 print(end-start, "- Seconds")

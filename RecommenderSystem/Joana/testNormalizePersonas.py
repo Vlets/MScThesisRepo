@@ -3,7 +3,7 @@ from RecommenderSystem.DataAlgorithms.NormalizePersona import NormalizePersona
 
 json_Tools = JsonProcessor()
 
-sortedData = json_Tools.do_it_all("./test_mb.json")
+sortedData = json_Tools.json_files_pre_processing("./test_mb.json")
 
 
 

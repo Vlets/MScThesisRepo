@@ -12,7 +12,7 @@ jsonTools = JsonProcessor()
 
 # unsorted data
 dataFrame = jsonTools.json_read(path)
-dataFrame = jsonTools.normalize_collectors(dataFrame)
+dataFrame = jsonTools.filter_columns(dataFrame)
 
 # normal data
 sortedData = jsonTools.read_and_sort_data(path)

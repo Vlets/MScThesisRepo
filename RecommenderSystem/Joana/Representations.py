@@ -11,7 +11,7 @@ reading_files = rf()
 reading_files.connect_to_database(uri)
 
 
-sortedData = json_Tools.do_it_all("./test_mb.json")
+sortedData = json_Tools.json_files_pre_processing("./test_mb.json")
 sortedData = NormalizePersona.normalize_table_personas(sortedData)
 
 user_index = 167

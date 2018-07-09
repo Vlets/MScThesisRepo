@@ -59,48 +59,23 @@ class NNModel:
         return (sum(accuracy_values) / len(accuracy_values))
 
     @staticmethod
-    def preprocess_data(initial_table, list_keywords):
+    def split_users_data_and_keywords_data(initial_table, list_keywords):
         """
-        This methods processes the given data in such way that is acceptable by the
-        Neural Network
-        :param initial_table: The whole database to work with
-        :param user_test: Users data to process
-        :param list_keywords: List of keywords from the items table
-        :return: The whole data based processed:
-                    X: The users data from the whole database
-                    Y: The users associated keywords from the whole database
-                    X_visitors: The given user data processed
-                    users_table: It is X in data frame format
-                    keywords_table: It is Y in data frame format
+
+        :param initial_table:
+        :param list_keywords:
+        :return:
         """
 
         keywords_table = initial_table[list_keywords]
 
         data_to_process = initial_table.drop(columns=list_keywords)
 
-        # 1st step, use one hot enconding on the table
-
-        # 2nd step, drop the unwanted columns
         to_drop = ['categories', 'transactionPath', 'visitorId']
         data_to_process = data_to_process.drop(columns=to_drop)
 
-        # 3rd step, separate the unwanted rows to a new users table
-        #user_test_data = users_table.tail(user_test_size)
-
-        # 4th step, separate the unwanted rows to a new categories table
-        # user_test_categories = categories_table.tail(user_test_size)
-
-        # 5th step, remove the unwanted rows from the whole users data table
-        #users_table = users_table.drop(user_test_data.index.values.tolist())
-
-        # 6th step, remove the unwanted rows from the whole categories table
-        # categories_table = categories_table.drop(user_test_categories.index.values.tolist())
-
-        # 7th step, get the wanted input
         X = data_to_process.iloc[:, :].values
-        #X_visitors = user_test_data.iloc[:, :].values
 
-        # 8nd step, get the wanted labels
         Y = keywords_table.iloc[:, :].values
 
         return X, Y
