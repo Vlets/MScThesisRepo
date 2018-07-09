@@ -1,5 +1,5 @@
 from RecommenderSystem.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
-from RecommenderSystem.Joana.Recommender_System_Main import Recommender_System_Main
+from RecommenderSystem.Joana.RecommenderSystemMain import RecommenderSystemMain
 import pandas as pd
 
 # Process the data
@@ -25,16 +25,17 @@ def NN_format_preprocess(data_to_process):
     return users_table
 
 """
+
 pre_data = PreprocessingData()
 
 
-pre_data.run_preprocessing(url, url_no_trans, url_after_everything)
+pre_data.json_files_preprocess(url, url_no_trans, url_after_everything)
 
 #Process the data to be acceptable by the DNN
-pre_data.create_items_table_and_add_transactionPath(url_no_trans, url_after_everything, url_items_file, url_to_save)
+pre_data.create_items_table_and_add_paths(url_no_trans, url_after_everything, url_items_file, url_to_save)
 """
 
-main = Recommender_System_Main()
+main = RecommenderSystemMain()
 
 initial_table = pd.read_json(url_to_save).reset_index(drop=True)
 initial_table = NN_format_preprocess(initial_table)

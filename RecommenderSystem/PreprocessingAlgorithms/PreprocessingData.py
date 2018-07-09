@@ -92,11 +92,11 @@ class PreprocessingData:
         items_table = JsonProcessor.make_items_table(table_no_paths)
         self.items_table = items_table
         items_table.to_json(items_file_name)
-        list_categories = self.create_list_all_possible_values(items_table, 'categories_terms')
+        list_keywords = self.create_list_all_possible_values(items_table, 'categories_terms')
         sortedData['transactionPath'] = sortedData.transactionPath.apply(self.to_apply_has_seen_items_function)
         sortedData = sortedData[sortedData.astype(str)['transactionPath'] != '[]'].reset_index(drop=True)
-        categories_table = self.create_one_hot_encoding_table(list_categories, sortedData, 'categories')
-        sortedData = pd.concat([sortedData, categories_table], axis=1)
+        keywords_table = self.create_one_hot_encoding_table(list_keywords, sortedData, 'categories')
+        sortedData = pd.concat([sortedData, keywords_table], axis=1)
         sortedData.to_json(file_path_to_save)
 
     def json_files_preprocess(self, name_file, file_to_save, file_after_everything):

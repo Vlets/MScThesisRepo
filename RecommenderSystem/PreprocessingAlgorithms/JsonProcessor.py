@@ -72,11 +72,11 @@ class JsonProcessor:
         sorted_data.columns = sorted_data.columns.str.replace("[.]", "_")
         sorted_data.to_json(file_path_to_save)
         final_data_frame = self.get_transactions(sorted_data)
-        final_data_frame['categories'] = final_data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
+        final_data_frame['keywords'] = final_data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
         final_data_frame = self.remove_homepage_and_stringify(final_data_frame)
-        # final_data_frame = JsonProcessor.join_categories_keywords(final_data_frame, 'categories')
+        final_data_frame = JsonProcessor.join_categories_keywords(final_data_frame, 'categories')
 
-        return final_data_frame.drop(['categories_terms', 'pageId'], axis=1)
+        return final_data_frame.drop(['categories_terms', 'pageId', 'keywords'], axis=1)
 
     @staticmethod
     def json_save(sorted_data, savepath, to_json=True):
@@ -96,9 +96,9 @@ class JsonProcessor:
         keep_columns = ['pageUrl', 'categories_terms']
         items_table = table.loc[table['pageId'].isin(keep_pageid)]
         items_table = items_table[keep_columns]
-        items_table['categories_terms'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
-        # items_table = JsonProcessor.join_categories_keywords(items_table, 'categories_terms')
-        # items_table = items_table.drop(['keywords'], axis=1)
+        items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
+        items_table = JsonProcessor.join_categories_keywords(items_table, 'categories_terms')
+        items_table = items_table.drop(['keywords'], axis=1)
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 
     @staticmethod

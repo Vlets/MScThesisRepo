@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-class Recommender_System_Main:
+class RecommenderSystemMain:
     """
     This is the class where the magic happens.
     For, it is only programmed to run with cold-start scenarios and calculate the precision
@@ -91,7 +91,7 @@ class Recommender_System_Main:
 
         # Get visitor past viewed items from the initial_table
         user_previous_paths = initial_table.loc[initial_table['visitorId'] == user_id]
-        user_seen_items_table, user_seen_items_list = Recommender_System_Main.get_seen_items_table_list(
+        user_seen_items_table, user_seen_items_list = RecommenderSystemMain.get_seen_items_table_list(
             user_previous_paths, items_table)
         user_seen_items_table = user_seen_items_table.reset_index(drop=True)
 
@@ -173,8 +173,8 @@ class Recommender_System_Main:
         user_indexes.remove(index_to_drop)
 
         # From the user_visits table, get the items he has seen
-        actual_seen_items_table, actual_seen_items_list = Recommender_System_Main.get_seen_items_table_list(user_visits,
-                                                                                                            items_table)
+        actual_seen_items_table, actual_seen_items_list = RecommenderSystemMain.get_seen_items_table_list(user_visits,
+                                                                                                          items_table)
         user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(user_visits, 'categories')
 
         # Drop the unwanted visits from initial_table
@@ -198,9 +198,9 @@ class Recommender_System_Main:
         :return: The precision of predicting the items and precision of predicting the keywords
         """
         actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_id = \
-            Recommender_System_Main.prepare_user_test_data(initial_table, items_table, list_keywords, user_id)
+            RecommenderSystemMain.prepare_user_test_data(initial_table, items_table, list_keywords, user_id)
 
-        main = Recommender_System_Main()
+        main = RecommenderSystemMain()
 
         final_result_items = main.run_main(initial_table, items_table, list_keywords, user_visits, user_id)
 

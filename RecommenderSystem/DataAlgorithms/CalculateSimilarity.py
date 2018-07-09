@@ -37,11 +37,11 @@ class CalculateSimilarity:
             paired_items.extend([(r[0], r[1])])
 
         for key, value in paired_items:
-            categories1, des1 = key
+            keywords1, des1 = key
             # name1, des1 = pair1
-            categories2, pair2 = value
+            keywords2, pair2 = value
             name2, des2 = pair2
-            similarity = cosine_similarity(categories1, categories2)
+            similarity = cosine_similarity(keywords1, keywords2)
             similarities_result.extend([(similarity.item(0, 0), name2)])
 
         return similarities_result
