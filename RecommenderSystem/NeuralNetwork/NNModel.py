@@ -9,7 +9,7 @@ import numpy as np
 
 
 # Importing the Keras libraries and packages
-class DNNModel:
+class NNModel:
 
     def __init__(self):
         self.model = None
@@ -59,7 +59,7 @@ class DNNModel:
         return (sum(accuracy_values) / len(accuracy_values))
 
     @staticmethod
-    def preprocess_data(initial_table, user_test, list_keywords):
+    def preprocess_data(initial_table, list_keywords):
         """
         This methods processes the given data in such way that is acceptable by the
         Neural Network
@@ -73,49 +73,37 @@ class DNNModel:
                     users_table: It is X in data frame format
                     keywords_table: It is Y in data frame format
         """
-        user_test_size = len(user_test)
 
         keywords_table = initial_table[list_keywords]
 
         data_to_process = initial_table.drop(columns=list_keywords)
-        data_to_process = pd.concat([data_to_process, user_test], ignore_index=True)
 
         # 1st step, use one hot enconding on the table
-        result_cities = pd.get_dummies(data_to_process['geo_city'])
-        result_continent = pd.get_dummies(data_to_process['geo_continent'])
-        result_country = pd.get_dummies(data_to_process['geo_country'])
-        result_persona_id = pd.get_dummies(data_to_process['personaIdScores_id'])
-        result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
-        users_table = data_to_process.drop(columns=['geo_city', 'geo_continent', 'geo_country', 'personaIdScores_id',
-                                                    'globalPersonaIdScores_id'])
-        users_table = pd.concat([users_table,
-                                 result_cities, result_continent, result_country,
-                                 result_persona_id, result_global_persona_id], axis=1)
 
         # 2nd step, drop the unwanted columns
         to_drop = ['categories', 'transactionPath', 'visitorId']
-        users_table = users_table.drop(columns=to_drop)
+        data_to_process = data_to_process.drop(columns=to_drop)
 
         # 3rd step, separate the unwanted rows to a new users table
-        user_test_data = users_table.tail(user_test_size)
+        #user_test_data = users_table.tail(user_test_size)
 
         # 4th step, separate the unwanted rows to a new categories table
         # user_test_categories = categories_table.tail(user_test_size)
 
         # 5th step, remove the unwanted rows from the whole users data table
-        users_table = users_table.drop(user_test_data.index.values.tolist())
+        #users_table = users_table.drop(user_test_data.index.values.tolist())
 
         # 6th step, remove the unwanted rows from the whole categories table
         # categories_table = categories_table.drop(user_test_categories.index.values.tolist())
 
         # 7th step, get the wanted input
-        X = users_table.iloc[:, :].values
-        X_visitors = user_test_data.iloc[:, :].values
+        X = data_to_process.iloc[:, :].values
+        #X_visitors = user_test_data.iloc[:, :].values
 
         # 8nd step, get the wanted labels
         Y = keywords_table.iloc[:, :].values
 
-        return X, Y, X_visitors, users_table, keywords_table
+        return X, Y
 
     def create_model(self, length_x, length_y):
         """
@@ -147,7 +135,7 @@ class DNNModel:
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         if graphs:
             history = self.model.fit(X_train, Y_train, epochs=4, batch_size=512, validation_data=(X_test, Y_test))
-            DNNModel.shows_graphs(history)
+            NNModel.shows_graphs(history)
 
         else:
             X_train = np.append(X_train, X_test, axis=0)
@@ -168,7 +156,7 @@ class DNNModel:
 
     @staticmethod
     def k_fold_validation(X, Y, length_x, length_y):
-        dnn_model_val = DNNModel()
+        dnn_model_val = NNModel()
         kf = KFold(n_splits=10)
         scores = []
         for train_index, test_index in kf.split(X):

@@ -2,11 +2,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer as TfidVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import itertools
 
+
 class CalculateSimilarity:
 
     @staticmethod
     def tokens(s):
-       return s.split(' ')
+        return s.split(' ')
 
     @staticmethod
     def similarity_results(used_items, not_used_items):
@@ -21,10 +22,10 @@ class CalculateSimilarity:
         seen item and the URL of the not seen item
         """
         used_items_length = len(used_items)
-        #used_items_keywords = [y for x, y in used_items]
+        # used_items_keywords = [y for x, y in used_items]
         not_used_items_keywords = [y for x, y in not_used_items]
         vectorizer = TfidVectorizer(tokenizer=CalculateSimilarity.tokens)
-        tfidf = vectorizer.fit_transform(used_items+not_used_items_keywords)
+        tfidf = vectorizer.fit_transform(used_items + not_used_items_keywords)
         used_items_vectors = [x.reshape(1, -1) for x in tfidf.toarray()[:used_items_length]]
         used_items_vectors = list(zip(used_items_vectors, used_items))
         not_used_items_vectors = [x.reshape(1, -1) for x in tfidf.toarray()[used_items_length:]]

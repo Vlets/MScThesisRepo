@@ -1,6 +1,6 @@
 from RecommenderSystem.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
 from RecommenderSystem.DataAlgorithms.CalculateSimilarity import CalculateSimilarity as cs
-from RecommenderSystem.NeuralNetwork.DNNModel import DNNModel
+from RecommenderSystem.NeuralNetwork.NNModel import NNModel
 import pandas as pd
 import numpy as np
 
@@ -81,7 +81,8 @@ class Main:
         # Drop the unwanted visits from initial_table
         initial_table = initial_table.drop(user_indexes).reset_index(drop=True)
 
-        user_visits = user_visits.drop(columns=list_keywords).reset_index(drop=True)
+        user_visits = user_visits.drop(columns=list_keywords)
+        user_visits = user_visits.drop(columns=['categories', 'transactionPath']).reset_index(drop=True)
 
         main = Main()
 
@@ -104,51 +105,58 @@ class Main:
         :param list_keywords: A list of all possible values of keywords based on the items_table
         :return: The precision of the systems
         """
-        dnn_model = DNNModel()
+        dnn_model = NNModel()
 
         user_id = user_data.loc[0, 'visitorId']
+        user_data = user_data.drop(columns=['visitorId'])
 
-        # - Data used to train the DNN.
-        # - Users_data is the input data to give to NN to train based on the initial_table
-        # - Users_keywords is the output data to give to NN to train based on the initial_table
-        # - User_data_to_test is the input data to give to NN to predict the output based on user_visits
-        # - Users_table is the input data in a format of data frame
-        # - Keywords_table is the output data in a format of data frame
-        users_data, users_keywords, user_data_to_test, users_table, keywords_table = \
-            dnn_model.preprocess_data(initial_table, user_data, list_keywords)
+        # Data used to train the DNN.
+        training_data, training_keywords = dnn_model.preprocess_data(initial_table, list_keywords)
+        testing_data = user_data.iloc[:, :].values
 
-        # Dimension of the input data
-        length_x = len(users_table.columns.values.tolist())
-
-        # Dimension of the output data
-        length_y = len(keywords_table.columns.values.tolist())
-
-        # Create Neural Network model with the calculated dimensions
-        dnn_model.create_model(length_x, length_y)
-
-        # Training the NN
-        dnn_model.train_model(users_data, users_keywords)
+        # Create and train the NN model
+        self.create_and_train_NN(dnn_model, training_data, training_keywords)
 
         # The chosen input data to give to NN to predict
-        user_data_to_give = np.array([user_data_to_test[0].tolist()])
-        # user_keywords_to_predict = np.array([hidden_user_keywords[0].tolist()])
+        testing_data = np.array([testing_data[0].tolist()])
 
         # The predictions from the NN based on the given input
-        user_keywords_predictions = dnn_model.predict_values(user_data_to_give)
-        # visitors_accuracy = DNNModel.calculate_accuracy(visitors_prediction, test_value_y)
+        user_keywords_predictions = dnn_model.predict_values(testing_data)
 
-        # Turn the predictions into table
-        predictions_as_table = pd.DataFrame(user_keywords_predictions)
+        # Get the predicted keywords
+        self.get_predicted_keywords(list_keywords, user_keywords_predictions)
 
-        # Delete the columns with only 0 as their values
-        predictions_as_table = predictions_as_table.loc[:, (predictions_as_table != 0).any(axis=0)]
+        # Get the table with seen items from user past visits and table with unseen items
+        items_with_predicted_keywords, user_seen_items_table = self.get_seen_unseen_items(initial_table, items_table,
+                                                                                          user_id)
+        # Prepare the data to then calculate similarities
+        filtered_items_tuples, seen_items_keywords = self.prepare_data_to_calculate_similarity(
+            items_with_predicted_keywords, user_seen_items_table)
 
-        # Get the indexes of the predicted keywords in list_keywords
-        predicted_keywords_indexes = predictions_as_table.columns.values.tolist()
+        # Calculate similarities based on their keywords
+        final_result = sorted(cs.similarity_results(seen_items_keywords, filtered_items_tuples))[::-1]
+        final_result_items = [y for x, y in final_result]
+        final_result_items = PreprocessingData.remove_duplicates(final_result_items)
 
-        # Get the actual keywords
-        predicted_keywords = [list_keywords[x] for x in predicted_keywords_indexes]
-        self.predicted_keywords = predicted_keywords
+        return final_result_items
+
+    def prepare_data_to_calculate_similarity(self, items_with_predicted_keywords, user_seen_items_table):
+        # Turn keywords into strings
+        items_with_predicted_keywords['categories_terms'] = items_with_predicted_keywords.categories_terms.apply(
+            " ".join)
+        user_seen_items_table['categories_terms'] = user_seen_items_table.categories_terms.apply(" ".join)
+        # Get list of keywords of each item
+        seen_items_keywords = user_seen_items_table.categories_terms.values.tolist()
+        filtered_items_keywords = items_with_predicted_keywords.categories_terms.values.tolist()
+        # Get list of pageUrls
+        # seen_items_urls = user_seen_items_table.pageUrl.values.tolist()
+        filtered_items_urls = items_with_predicted_keywords.pageUrl.values.tolist()
+        # Zip the ckeywords and pageUrls
+        # seen_items_tuples = list(zip(seen_items_urls, seen_items_keywords))
+        filtered_items_tuples = list(zip(filtered_items_urls, filtered_items_keywords))
+        return filtered_items_tuples, seen_items_keywords
+
+    def get_seen_unseen_items(self, initial_table, items_table, user_id):
 
         # Get table with items that have the keywords found previously
         items_with_predicted_keywords = items_table.copy()
@@ -166,26 +174,22 @@ class Main:
         items_with_predicted_keywords = items_with_predicted_keywords[
             (~items_with_predicted_keywords.pageUrl.isin(user_seen_items_table))]
 
-        # Turn keywords into strings
-        items_with_predicted_keywords['categories_terms'] = items_with_predicted_keywords.categories_terms.apply(
-            " ".join)
-        user_seen_items_table['categories_terms'] = user_seen_items_table.categories_terms.apply(" ".join)
+        return items_with_predicted_keywords, user_seen_items_table
 
-        # Get list of keywords of each item
-        seen_items_keywords = user_seen_items_table.categories_terms.values.tolist()
-        filtered_items_keywords = items_with_predicted_keywords.categories_terms.values.tolist()
+    def get_predicted_keywords(self, list_keywords, user_keywords_predictions):
+        # Turn the predictions into table
+        predictions_as_table = pd.DataFrame(user_keywords_predictions)
+        # Delete the columns with only 0 as their values
+        predictions_as_table = predictions_as_table.loc[:, (predictions_as_table != 0).any(axis=0)]
+        # Get the indexes of the predicted keywords in list_keywords
+        predicted_keywords_indexes = predictions_as_table.columns.values.tolist()
+        # Get the actual keywords
+        predicted_keywords = [list_keywords[x] for x in predicted_keywords_indexes]
+        self.predicted_keywords = predicted_keywords
 
-        # Get list of pageUrls
-        #seen_items_urls = user_seen_items_table.pageUrl.values.tolist()
-        filtered_items_urls = items_with_predicted_keywords.pageUrl.values.tolist()
-
-        # Zip the ckeywords and pageUrls
-        #seen_items_tuples = list(zip(seen_items_urls, seen_items_keywords))
-        filtered_items_tuples = list(zip(filtered_items_urls, filtered_items_keywords))
-
-        # Calculate similarities based on their keywords
-        final_result = sorted(cs.similarity_results(seen_items_keywords, filtered_items_tuples))[::-1]
-        final_result_items = [y for x, y in final_result]
-        final_result_items = PreprocessingData.remove_duplicates(final_result_items)
-
-        return final_result_items
+    def create_and_train_NN(self, dnn_model, training_data, training_keywords):
+        data_rows_len, data_columns_len = training_data.shape
+        keywords_rows_len, keywords_columns_len = training_keywords.shape
+        dnn_model.create_model(data_columns_len, keywords_columns_len)
+        # Training the NN
+        dnn_model.train_model(training_data, training_keywords)

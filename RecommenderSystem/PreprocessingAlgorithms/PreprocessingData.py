@@ -77,7 +77,8 @@ class PreprocessingData:
 
         return categories_table
 
-    def preprocessing_DNN(self, file_no_transactions, file_after_processing, items_file_name, file_path_to_save):
+    def create_items_table_and_add_transactionPath(self, file_no_transactions, file_after_processing, items_file_name,
+                                                   file_path_to_save):
         """
 
         :param file_no_transactions:
@@ -96,7 +97,6 @@ class PreprocessingData:
         sortedData = sortedData[sortedData.astype(str)['transactionPath'] != '[]'].reset_index(drop=True)
         categories_table = self.create_table(list_categories, sortedData, 'categories')
         sortedData = pd.concat([sortedData, categories_table], axis=1)
-        # sortedData = sortedData.drop(columns=['transactionPath'])
         sortedData.to_json(file_path_to_save)
 
     def run_preprocessing(self, name_file, file_to_save, file_after_everything):
