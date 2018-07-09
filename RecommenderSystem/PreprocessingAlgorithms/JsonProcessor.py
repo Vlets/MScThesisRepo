@@ -1,26 +1,11 @@
 import pandas as pd
-import math
-import  numpy as np
-import ast
+import numpy as np
 from RecommenderSystem.DataAlgorithms import UrlKeywordExtractor as urlExtract
 from pandas.io.json import json_normalize
 from RecommenderSystem.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 
 
-
 class JsonProcessor:
-
-    def __init__(self):
-        self.file = None
-        self.list_pageid = []
-
-    @staticmethod
-    def remove_duplicates(duplicate):
-        final_list = []
-        for num in duplicate:
-            if num not in final_list:
-                final_list.append(num)
-        return final_list
 
     @staticmethod
     def json_read(filepath, multiline=False):
@@ -44,12 +29,12 @@ class JsonProcessor:
         print("Step 2/7 - Filtering, done...")
         return processed_data
 
-
-    def remove_homepage_and_stringify(self, data_frame):
-        trans = [str(x) for x in data_frame['transactionPath'] if len(x) < 2]
+    @staticmethod
+    def remove_homepage_and_stringify(data_frame):
+        transactions = [str(x) for x in data_frame['transactionPath'] if len(x) < 2]
         keep_values = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
         result = data_frame[
-            (data_frame.astype(str)['transactionPath'].isin(trans)) & (~data_frame['pageId'].isin(keep_values))]
+            (data_frame.astype(str)['transactionPath'].isin(transactions)) & (~data_frame['pageId'].isin(keep_values))]
         indexes = result.index.values.tolist()
         data_frame = data_frame.drop(indexes)
         data_frame = data_frame.reset_index(drop=True)
@@ -60,13 +45,18 @@ class JsonProcessor:
 
     @staticmethod
     def make_items_table(table):
-        keep_values = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
+        """
+
+        :param table:
+        :return:
+        """
+        keep_pageid = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
         keep_columns = ['pageUrl', 'categories_terms']
-        items_table = table.loc[table['pageId'].isin(keep_values)]
+        items_table = table.loc[table['pageId'].isin(keep_pageid)]
         items_table = items_table[keep_columns]
-        items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
-        items_table = JsonProcessor.join_categories_keywords(items_table, 'categories_terms')
-        items_table = items_table.drop(['keywords'], axis=1)
+        items_table['categories_terms'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
+        # items_table = JsonProcessor.join_categories_keywords(items_table, 'categories_terms')
+        # items_table = items_table.drop(['keywords'], axis=1)
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 
     def read_and_sort_data(self, file_path):
@@ -103,21 +93,25 @@ class JsonProcessor:
 
         return table
 
-    def do_it_all(self, file_path, file_to_save):
-        sorted_data = self.read_and_sort_data(file_path)
-        sorted_data.columns = sorted_data.columns.str.replace("[.]", "_")
-        sorted_data.to_json(file_to_save)
-        self.file = sorted_data
-        self.list_pageid = mfa.remove_duplicates(sorted_data.pageId.tolist())
-        transactions = mfa.init_algorithm(sorted_data)
-        transaction_dataframe = pd.DataFrame(transactions,
-                                             columns=['visitorId', 'timestamp', 'transactionPath', 'categories'])
-        final_data_frame = pd.merge(transaction_dataframe, sorted_data, on=['visitorId', 'timestamp'])
-        final_data_frame['keywords'] = final_data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
-        final_data_frame = self.remove_homepage_and_stringify(final_data_frame)
-        final_data_frame = JsonProcessor.join_categories_keywords(final_data_frame, 'categories')
+    def do_it_all(self, file_to_read_path, file_path_to_save):
+        """
 
-        return final_data_frame.drop(['timestamp', 'pageUrl', 'categories_terms', 'pageId', 'keywords'], axis=1)
+        :param file_to_read_path:
+        :param file_path_to_save:
+        :return:
+        """
+        sorted_data = self.read_and_sort_data(file_to_read_path)
+        sorted_data.columns = sorted_data.columns.str.replace("[.]", "_")
+        sorted_data.to_json(file_path_to_save)
+        transactions = mfa.init_algorithm(sorted_data)
+        transaction_data_frame = pd.DataFrame(transactions,
+                                              columns=['visitorId', 'timestamp', 'transactionPath', 'categories'])
+        final_data_frame = pd.merge(transaction_data_frame, sorted_data, on=['visitorId', 'timestamp'])
+        final_data_frame['categories'] = final_data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
+        final_data_frame = self.remove_homepage_and_stringify(final_data_frame)
+        # final_data_frame = JsonProcessor.join_categories_keywords(final_data_frame, 'categories')
+
+        return final_data_frame.drop(['timestamp', 'pageUrl', 'categories_terms', 'pageId'], axis=1)
 
     @staticmethod
     def json_save(sorted_data, savepath, to_json=True):
@@ -125,5 +119,3 @@ class JsonProcessor:
             sorted_data.to_json(savepath + ".json", force_ascii=False)
         if not to_json:
             sorted_data.to_csv(savepath + ".csv")
-
-

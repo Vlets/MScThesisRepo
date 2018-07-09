@@ -59,12 +59,26 @@ class DNNModel:
         return (sum(accuracy_values) / len(accuracy_values))
 
     @staticmethod
-    def preprocess_data(initial_table, user_test, list_categories):
+    def preprocess_data(initial_table, user_test, list_keywords):
+        """
+        This methods processes the given data in such way that is acceptable by the
+        Neural Network
+        :param initial_table: The whole database to work with
+        :param user_test: Users data to process
+        :param list_keywords: List of keywords from the items table
+        :return: The whole data based processed:
+                    X: The users data from the whole database
+                    Y: The users associated keywords from the whole database
+                    X_visitors: The given user data processed
+                    users_table: It is X in data frame format
+                    keywords_table: It is Y in data frame format
+        """
         user_test_size = len(user_test)
 
-        data_to_process = pd.concat([initial_table, user_test], ignore_index=True)
+        keywords_table = initial_table[list_keywords]
 
-        categories_table = data_to_process[list_categories]
+        data_to_process = initial_table.drop(columns=list_keywords)
+        data_to_process = pd.concat([data_to_process, user_test], ignore_index=True)
 
         # 1st step, use one hot enconding on the table
         result_cities = pd.get_dummies(data_to_process['geo_city'])
@@ -74,37 +88,43 @@ class DNNModel:
         result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
         users_table = data_to_process.drop(columns=['geo_city', 'geo_continent', 'geo_country', 'personaIdScores_id',
                                                     'globalPersonaIdScores_id'])
-        users_table = pd.concat([users_table, result_cities, result_continent, result_country, result_persona_id,
-                                 result_global_persona_id], axis=1)
+        users_table = pd.concat([users_table,
+                                 result_cities, result_continent, result_country,
+                                 result_persona_id, result_global_persona_id], axis=1)
 
-        # 2nd step, drop the labels
-        to_drop = list_categories
-        to_drop.extend(['categories', 'transactionPath', 'visitorId'])
+        # 2nd step, drop the unwanted columns
+        to_drop = ['categories', 'transactionPath', 'visitorId']
         users_table = users_table.drop(columns=to_drop)
 
         # 3rd step, separate the unwanted rows to a new users table
         user_test_data = users_table.tail(user_test_size)
 
         # 4th step, separate the unwanted rows to a new categories table
-        user_test_categories = categories_table.tail(user_test_size)
+        # user_test_categories = categories_table.tail(user_test_size)
 
         # 5th step, remove the unwanted rows from the whole users data table
         users_table = users_table.drop(user_test_data.index.values.tolist())
 
         # 6th step, remove the unwanted rows from the whole categories table
-        categories_table = categories_table.drop(user_test_categories.index.values.tolist())
+        # categories_table = categories_table.drop(user_test_categories.index.values.tolist())
 
         # 7th step, get the wanted input
         X = users_table.iloc[:, :].values
         X_visitors = user_test_data.iloc[:, :].values
 
         # 8nd step, get the wanted labels
-        Y = categories_table.iloc[:, :].values
-        Y_visitors = user_test_categories.iloc[:, :].values
+        Y = keywords_table.iloc[:, :].values
 
-        return X, Y, X_visitors, Y_visitors, users_table, categories_table, data_to_process
+        return X, Y, X_visitors, users_table, keywords_table
 
     def create_model(self, length_x, length_y):
+        """
+        This method created the Neural Network model with the given dimensions
+        fro the input layer and output layer
+        :param length_x: Dimension fr the input layer
+        :param length_y: Number of nodes for the output layer
+        :return: A Neural Network model
+        """
         model = Sequential()
         model.add(Dense(64, activation='relu', input_shape=(length_x,)))
         model.add(Dense(16, activation='relu'))
@@ -115,16 +135,31 @@ class DNNModel:
         return model
 
     def train_model(self, X, Y, graphs=False):
+        """
+        This method trains the Neural Network with the given input and output data
+        :param X: The input data
+        :param Y: The output data
+        :param graphs: If true, shows graphs regarding the loss and accuracy when
+        training; otherwise, shows no graphs
+        :return: Nothing, just trains the Neural Network
+        """
+        # Shuffle and split
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         if graphs:
-            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
             history = self.model.fit(X_train, Y_train, epochs=4, batch_size=512, validation_data=(X_test, Y_test))
             DNNModel.shows_graphs(history)
 
         else:
-            self.model.fit(X, Y, epochs=4, batch_size=512)
-
+            X_train = np.append(X_train, X_test, axis=0)
+            Y_train = np.append(Y_train, Y_test, axis=0)
+            self.model.fit(X_train, Y_train, epochs=4, batch_size=512, verbose=0)
 
     def predict_values(self, input_x):
+        """
+        This method makes a prediction based on the given data
+        :param input_x: The given data to use to make a prediction
+        :return: The prediction made with binary values
+        """
         prediction = self.model.predict(input_x)
         prediction[prediction >= 0.5] = 1
         prediction[prediction < 0.5] = 0

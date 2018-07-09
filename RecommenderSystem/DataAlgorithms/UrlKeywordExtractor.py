@@ -1,19 +1,10 @@
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
-
-
-def remove_duplicates(duplicate):
-    final_list = []
-    for num in duplicate:
-        if num not in final_list:
-            final_list.append(num)
-    return final_list
-
-#homepage = 'https://www.onehippo.org/'
-#homepage2 = 'https://www.onehippo.com/'
-#homepage3 = 'http://www.onehippo.com/'
-#homepages = [homepage, homepage2, homepage3]
+# homepage = 'https://www.onehippo.org/'
+# homepage2 = 'https://www.onehippo.com/'
+# homepage3 = 'http://www.onehippo.com/'
+# homepages = [homepage, homepage2, homepage3]
 homepages = ['https://www.onehippo.org/', 'https://www.onehippo.com/en', 'https://www.onehippo.com/de',
              'http://marketplace.onehippo.com/', 'https://www.onehippo.com/nl/', 'https://www.onehippo.com/nl',
              'https://www.onehippo.org/7_8', 'https://www.onehippo.org/7_9', 'https://www.onehippo.org/10',
@@ -23,8 +14,17 @@ homepages = ['https://www.onehippo.org/', 'https://www.onehippo.com/en', 'https:
              'http://www.onehippo.co.uk/site/dotorg/', 'https://www.onehippo.org/10/', 'https://www.onehippo.org/7_6',
              'https://www.onehippo.org/7_7', 'https://www.onehippo.org/partner/', 'https://www.onehippo.org/partner']
 
+
 def get_keywords(url, items=False):
+    """
+    This method gets the keywords from a URL or a list of URLs
+    :param url:'The URL to get the keywords from
+    :param items: If true, only get the keywords from one URL:
+    Otherwise, get the keywords from a list of URLs
+    :return: A ordered and without duplicates list of keywords
+    """
     if not items:
+        # Remove the first and last URLs from a transactionPath?
         url = url[1:-1]
     for home_page in homepages:
         url = url.replace(home_page, " ")
@@ -48,4 +48,4 @@ def get_keywords(url, items=False):
     sw.remove('about')
     sw.remove('why')
     result = [w for w in path_tokens if w not in sw]
-    return list(result)
+    return sorted(set(result))
