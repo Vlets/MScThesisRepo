@@ -71,7 +71,7 @@ class NNModel:
 
         data_to_process = initial_table.drop(columns=list_keywords)
 
-        to_drop = ['categories', 'transactionPath', 'visitorId']
+        to_drop = ['keywords', 'transactionPath', 'visitorId']
         data_to_process = data_to_process.drop(columns=to_drop)
 
         X = data_to_process.iloc[:, :].values

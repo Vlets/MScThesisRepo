@@ -11,29 +11,13 @@ class MFAlgorithm:
                 final_list.append(num)
         return final_list
 
-    @staticmethod
-    def keywords_value(dict_url_keywords, string):
-        size_dict = len(dict_url_keywords)
-        count_nan = list(dict_url_keywords.values()).count(np.nan)
-        if 1 < size_dict == count_nan:
-            keywords = np.nan
-        elif 1 < size_dict != count_nan:
-            keywords = [dict_url_keywords[x] for x in string if isinstance(dict_url_keywords[x], list)]
-            keywords = [item for sublist in keywords for item in sublist]
-            keywords = MFAlgorithm.remove_duplicates(keywords)
-        else:
-            keywords = list(dict_url_keywords.values())[0]
-
-        return keywords
 
     @staticmethod
-    def run_MF_algorithm(visitor, time, urls, dict_urls_keywords):
+    def run_MF_algorithm(visitor, time, urls):
         """
 
         :param visitor:
         :param time:
-        :param urls:
-        :param dict_urls_keywords:
         :return:
         """
         url_pairs = [('', urls[0], 0, 0)]
@@ -48,9 +32,9 @@ class MFAlgorithm:
         end_transactions = False
         all_transactions = []
         timestamp = time[0]
-        number_of_pais = len(url_pairs)
+        number_of_pairs = len(url_pairs)
 
-        while i < number_of_pais:
+        while i < number_of_pairs:
             current_url, next_url, index_current, index_next = url_pairs[i]
 
             # Initialize the transaction for the first URL
@@ -65,8 +49,7 @@ class MFAlgorithm:
             if next_url in current_transaction:
                 if not end_transactions:
                     if current_transaction not in all_transactions:
-                        keywords = MFAlgorithm.keywords_value(dict_urls_keywords, current_transaction)
-                        all_transactions.append((visitor, timestamp, current_transaction, keywords))
+                        all_transactions.append((visitor, timestamp, current_transaction))
                 this_index = current_transaction.index(next_url)
                 current_transaction = current_transaction[0:this_index + 1]
                 end_transactions = True
@@ -82,8 +65,7 @@ class MFAlgorithm:
             i += 1
 
         if current_transaction not in all_transactions:
-            keywords = MFAlgorithm.keywords_value(dict_urls_keywords, current_transaction)
-            all_transactions.append((visitor, timestamp, current_transaction, keywords))
+            all_transactions.append((visitor, timestamp, current_transaction))
 
         return all_transactions
 
@@ -102,9 +84,7 @@ class MFAlgorithm:
         for visitorId, group in grouped:
             time = grouped.get_group(visitorId).timestamp.tolist()
             path = grouped.get_group(visitorId).pageUrl.tolist()
-            categories = grouped.get_group(visitorId).categories_terms.tolist()
-            dict_path_categories = dict(zip(path, categories))
-            result_paths = MFAlgorithm.run_MF_algorithm(visitorId, time, path, dict_path_categories)
+            result_paths = MFAlgorithm.run_MF_algorithm(visitorId, time, path)
             result.extend(result_paths)
             i += 1
             if i % 100 == 0:

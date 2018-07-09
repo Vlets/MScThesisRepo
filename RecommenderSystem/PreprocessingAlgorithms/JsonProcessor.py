@@ -20,7 +20,7 @@ class JsonProcessor:
         collector_data = json_normalize(data_frame['collectorData'])
         all_data = pd.concat([collector_data, data_frame], axis=1)
         keep_list = ['visitorId', 'timestamp', 'pageUrl', 'geo.country', 'geo.city', 'geo.continent',
-                     'categories.terms', 'globalPersonaIdScores', 'personaIdScores', 'pageId']
+                     'globalPersonaIdScores', 'personaIdScores', 'pageId']
         processed_data = all_data[keep_list]
         return processed_data
 
@@ -35,7 +35,7 @@ class JsonProcessor:
     # Step 4
     def get_transactions(self, sorted_data):
         transactions = mfa.init_algorithm(sorted_data)
-        data_frame = pd.DataFrame(transactions, columns=['visitorId', 'timestamp', 'transactionPath', 'categories'])
+        data_frame = pd.DataFrame(transactions, columns=['visitorId', 'timestamp', 'transactionPath'])
         data_frame = pd.merge(data_frame, sorted_data, on=['visitorId', 'timestamp'])
 
         return data_frame.drop(['timestamp', 'pageUrl'], axis=1)
@@ -74,9 +74,8 @@ class JsonProcessor:
         final_data_frame = self.get_transactions(sorted_data)
         final_data_frame['keywords'] = final_data_frame.transactionPath.astype(str).apply(urlExtract.get_keywords)
         final_data_frame = self.remove_homepage_and_stringify(final_data_frame)
-        final_data_frame = JsonProcessor.join_categories_keywords(final_data_frame, 'categories')
 
-        return final_data_frame.drop(['categories_terms', 'pageId', 'keywords'], axis=1)
+        return final_data_frame.drop(['pageId'], axis=1)
 
     @staticmethod
     def json_save(sorted_data, savepath, to_json=True):
@@ -92,38 +91,11 @@ class JsonProcessor:
         :param table:
         :return:
         """
-        keep_pageid = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
-        keep_columns = ['pageUrl', 'categories_terms']
-        items_table = table.loc[table['pageId'].isin(keep_pageid)]
+        keep_page_id = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
+        keep_columns = ['pageUrl', 'visitorId']
+        items_table = table.loc[table['pageId'].isin(keep_page_id)]
         items_table = items_table[keep_columns]
         items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
-        items_table = JsonProcessor.join_categories_keywords(items_table, 'categories_terms')
-        items_table = items_table.drop(['keywords'], axis=1)
+        items_table = items_table.drop(columns='visitorId')
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 
-    @staticmethod
-    def join_categories_keywords(table, word):
-        i = 0
-        visitor_length = len(table)
-        if word == 'categories':
-            table.categories.replace(np.nan, '[]', inplace=True)
-        else:
-            table.categories_terms.replace(np.nan, '[]', inplace=True)
-        for index, row in table.iterrows():
-            keywords = row['keywords']
-            categories = row[word]
-            if str(categories) == '[\'\']' or str(categories) == '[]':
-                row[word] = keywords
-                table.loc[index] = row
-                i += 1
-                if i % 100 == 0:
-                    print("Progress Join:", round((i / visitor_length) * 100, 2), "%")
-                continue
-
-            categories.extend(keywords)
-            row[word] = categories
-            i += 1
-            if i % 100 == 0:
-                print("Progress Join:", round((i / visitor_length) * 100, 2), "%")
-
-        return table

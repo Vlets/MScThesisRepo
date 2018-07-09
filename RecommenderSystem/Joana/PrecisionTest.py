@@ -41,7 +41,7 @@ initial_table = pd.read_json(url_to_save).reset_index(drop=True)
 initial_table = NN_format_preprocess(initial_table)
 items_table = pd.read_json(url_items_file).reset_index(drop=True)
 
-list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'categories_terms')
+list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'keywords')
 
 groups = initial_table.groupby('visitorId').count()
 
@@ -58,7 +58,7 @@ for visitor in returning_visitors:
     items_table_to_give = items_table.copy()
     list_keywords_to_give = list_keywords.copy()
     guessed_items, guessed_keywords = main.precision_main(initial_table_to_give, items_table_to_give,
-                                                          list_keywords_to_give, visitor, 5)
+                                                          list_keywords_to_give, visitor, 10)
     precision_items.append(guessed_items)
     precision_keywords.append(guessed_keywords)
     i += 1

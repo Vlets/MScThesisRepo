@@ -43,7 +43,7 @@ class RecommenderSystemMain:
         """
         lst = PreprocessingData.create_list_all_possible_values(table, 'transactionPath')
         lst = [x for x in lst if x in it_table.pageUrl.unique().tolist()]
-        table_result = it_table.loc[it_table['pageUrl'].isin(lst)][['pageUrl', 'categories_terms']]
+        table_result = it_table.loc[it_table['pageUrl'].isin(lst)][['pageUrl', 'keywords']]
 
         return table_result, lst
 
@@ -57,13 +57,13 @@ class RecommenderSystemMain:
         """
 
         # Turn keywords into strings
-        items_with_predicted_keywords['categories_terms'] = items_with_predicted_keywords.categories_terms.apply(
+        items_with_predicted_keywords['keywords'] = items_with_predicted_keywords.keywords.apply(
             " ".join)
-        user_seen_items_table['categories_terms'] = user_seen_items_table.categories_terms.apply(" ".join)
+        user_seen_items_table['keywords'] = user_seen_items_table.keywords.apply(" ".join)
 
         # Get list of keywords of each item
-        seen_items_keywords = user_seen_items_table.categories_terms.values.tolist()
-        filtered_items_keywords = items_with_predicted_keywords.categories_terms.values.tolist()
+        seen_items_keywords = user_seen_items_table.keywords.values.tolist()
+        filtered_items_keywords = items_with_predicted_keywords.keywords.values.tolist()
 
         # Get list of pageUrls
         filtered_items_urls = items_with_predicted_keywords.pageUrl.values.tolist()
@@ -84,10 +84,10 @@ class RecommenderSystemMain:
 
         # Get table with items that have the keywords found previously
         items_with_predicted_keywords = items_table.copy()
-        items_with_predicted_keywords['categories_terms'] = items_with_predicted_keywords.categories_terms.apply(
+        items_with_predicted_keywords['keywords'] = items_with_predicted_keywords.keywords.apply(
             self.to_filter_function)
         items_with_predicted_keywords = items_with_predicted_keywords[
-            items_with_predicted_keywords.astype(str)['categories_terms'] != '[]'].reset_index(drop=True)
+            items_with_predicted_keywords.astype(str)['keywords'] != '[]'].reset_index(drop=True)
 
         # Get visitor past viewed items from the initial_table
         user_previous_paths = initial_table.loc[initial_table['visitorId'] == user_id]
@@ -131,11 +131,11 @@ class RecommenderSystemMain:
         :return:
         """
 
-        data_rows_len, data_columns_len = training_data.shape
+        data_rows, data_columns = training_data.shape
 
-        keywords_rows_len, keywords_columns_len = training_keywords.shape
+        keywords_rows, keywords_columns = training_keywords.shape
 
-        dnn_model.create_model(data_columns_len, keywords_columns_len)
+        dnn_model.create_model(data_columns, keywords_columns)
 
         dnn_model.train_model(training_data, training_keywords)
 
@@ -156,6 +156,14 @@ class RecommenderSystemMain:
 
     @staticmethod
     def prepare_user_test_data(initial_table, items_table, list_keywords, user_id):
+        """
+
+        :param initial_table:
+        :param items_table:
+        :param list_keywords:
+        :param user_id:
+        :return:
+        """
 
         # Get previous visits from user with user_id into a table
         user_visits = initial_table[initial_table['visitorId'] == user_id]
@@ -175,13 +183,13 @@ class RecommenderSystemMain:
         # From the user_visits table, get the items he has seen
         actual_seen_items_table, actual_seen_items_list = RecommenderSystemMain.get_seen_items_table_list(user_visits,
                                                                                                           items_table)
-        user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(user_visits, 'categories')
+        user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(user_visits, 'keywords')
 
         # Drop the unwanted visits from initial_table
         initial_table = initial_table.drop(user_indexes).reset_index(drop=True)
 
         user_visits = user_visits.drop(columns=list_keywords)
-        user_visits = user_visits.drop(columns=['categories', 'transactionPath', 'visitorId'])
+        user_visits = user_visits.drop(columns=['keywords', 'transactionPath', 'visitorId'])
 
         return actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_id
 
@@ -222,20 +230,20 @@ class RecommenderSystemMain:
         :param list_keywords: A list of all possible values of keywords based on the items_table
         :return: The precision of the systems
         """
-        dnn_model = NNModel()
+        nn_model = NNModel()
 
         # Data used to train the DNN.
-        training_data, training_keywords = dnn_model.split_users_data_and_keywords_data(initial_table, list_keywords)
+        training_data, training_keywords = nn_model.split_users_data_and_keywords_data(initial_table, list_keywords)
         testing_data = user_data.iloc[:, :].values
 
         # Create and train the NN model
-        self.create_and_train_NN(dnn_model, training_data, training_keywords)
+        self.create_and_train_NN(nn_model, training_data, training_keywords)
 
         # The chosen input data to give to NN to predict
         testing_data = np.array([testing_data[0].tolist()])
 
         # The predictions from the NN based on the given input
-        prediction_testing_data = dnn_model.predict_values(testing_data)
+        prediction_testing_data = nn_model.predict_values(testing_data)
 
         # Get the predicted keywords
         self.get_predicted_keywords(list_keywords, prediction_testing_data)
