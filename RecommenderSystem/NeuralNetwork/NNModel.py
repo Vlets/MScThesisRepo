@@ -56,7 +56,7 @@ class NNModel:
 
         accuracy_values = value_results.accuracy.values.tolist()
 
-        return (sum(accuracy_values) / len(accuracy_values))
+        return sum(accuracy_values) / len(accuracy_values)
 
     @staticmethod
     def split_users_data_and_keywords_data(initial_table, list_keywords):

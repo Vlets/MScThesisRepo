@@ -64,18 +64,18 @@ class PreprocessingData:
         :param column_name:
         :return:
         """
-        categories_table = pd.DataFrame(0, index=np.arange(len(given_table)), columns=values_list)
+        ohe_table = pd.DataFrame(0, index=np.arange(len(given_table)), columns=values_list)
         i = 0
         visitor_length = len(given_table)
         for index, row in given_table.iterrows():
             values = row[column_name]
             values = [x for x in values if x in values_list]
-            categories_table.loc[index, values] = 1
+            ohe_table.loc[index, values] = 1
             i += 1
             if i % 100 == 0:
                 print("Progress Table:", round((i / visitor_length) * 100, 2), "%")
 
-        return categories_table
+        return ohe_table
 
     def create_items_table_and_add_paths(self, file_no_transactions, file_after_processing, items_file_name,
                                          file_path_to_save):
@@ -87,9 +87,9 @@ class PreprocessingData:
         :param file_path_to_save:
         :return:
         """
-        table_no_trans = pd.read_json(file_no_transactions).reset_index(drop=True)
+        table_no_paths = pd.read_json(file_no_transactions).reset_index(drop=True)
         sortedData = pd.read_json(file_after_processing).reset_index(drop=True)
-        items_table = JsonProcessor.make_items_table(table_no_trans)
+        items_table = JsonProcessor.make_items_table(table_no_paths)
         self.items_table = items_table
         items_table.to_json(items_file_name)
         list_categories = self.create_list_all_possible_values(items_table, 'categories_terms')

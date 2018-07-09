@@ -91,7 +91,8 @@ class Recommender_System_Main:
 
         # Get visitor past viewed items from the initial_table
         user_previous_paths = initial_table.loc[initial_table['visitorId'] == user_id]
-        user_seen_items_table, user_seen_items_list = Recommender_System_Main.get_seen_items_table_list(user_previous_paths, items_table)
+        user_seen_items_table, user_seen_items_list = Recommender_System_Main.get_seen_items_table_list(
+            user_previous_paths, items_table)
         user_seen_items_table = user_seen_items_table.reset_index(drop=True)
 
         # Remove the seen items in filtered items
@@ -172,16 +173,17 @@ class Recommender_System_Main:
         user_indexes.remove(index_to_drop)
 
         # From the user_visits table, get the items he has seen
-        actual_seen_items_table, actual_seen_items_list = Recommender_System_Main.get_seen_items_table_list(user_visits, items_table)
+        actual_seen_items_table, actual_seen_items_list = Recommender_System_Main.get_seen_items_table_list(user_visits,
+                                                                                                            items_table)
         user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(user_visits, 'categories')
 
         # Drop the unwanted visits from initial_table
         initial_table = initial_table.drop(user_indexes).reset_index(drop=True)
+
         user_visits = user_visits.drop(columns=list_keywords)
-        user_visits = user_visits.drop(columns=['categories', 'transactionPath']).reset_index(drop=True)
+        user_visits = user_visits.drop(columns=['categories', 'transactionPath', 'visitorId'])
 
-        return actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits
-
+        return actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_id
 
     @staticmethod
     def precision_main(initial_table, items_table, list_keywords, user_id, k):
@@ -195,12 +197,12 @@ class Recommender_System_Main:
         :param k: Top k items to check the precision
         :return: The precision of predicting the items and precision of predicting the keywords
         """
-        actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits = Recommender_System_Main.prepare_user_test_data(
-            initial_table, items_table, list_keywords, user_id)
+        actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_id = \
+            Recommender_System_Main.prepare_user_test_data(initial_table, items_table, list_keywords, user_id)
 
         main = Recommender_System_Main()
 
-        final_result_items = main.run_main(initial_table, items_table, list_keywords, user_visits)
+        final_result_items = main.run_main(initial_table, items_table, list_keywords, user_visits, user_id)
 
         correctly_predicted_items = [x for x in final_result_items if x in actual_seen_items_list]
         indexes = [final_result_items.index(value) for value in correctly_predicted_items]
@@ -210,9 +212,10 @@ class Recommender_System_Main:
 
         return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords)
 
-    def run_main(self, initial_table, items_table, list_keywords, user_data):
+    def run_main(self, initial_table, items_table, list_keywords, user_data, user_id):
         """
         This method runs the whole project. This is how the recommender systems would work.
+        :param user_id:
         :param user_data: The data of the user to be used in the process
         :param initial_table: The database in its original state (after processing)
         :param items_table: The table with the urls of items and their associated keywords
@@ -220,9 +223,6 @@ class Recommender_System_Main:
         :return: The precision of the systems
         """
         dnn_model = NNModel()
-
-        user_id = user_data.loc[0, 'visitorId']
-        user_data = user_data.drop(columns=['visitorId'])
 
         # Data used to train the DNN.
         training_data, training_keywords = dnn_model.split_users_data_and_keywords_data(initial_table, list_keywords)
@@ -251,6 +251,3 @@ class Recommender_System_Main:
         final_result_items = self.calculate_similarities(filtered_items_tuples, seen_items_keywords)
 
         return final_result_items
-
-
-
