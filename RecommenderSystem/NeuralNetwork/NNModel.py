@@ -61,10 +61,11 @@ class NNModel:
     @staticmethod
     def split_users_data_and_keywords_data(initial_table, list_keywords):
         """
-
-        :param initial_table:
-        :param list_keywords:
-        :return:
+        This method separates the initial_table into two table, the users data
+        and the keywords data
+        :param initial_table: The table used to make the separation
+        :param list_keywords: List with all values of keywords
+        :return: Data of users; Data with keywords
         """
 
         keywords_table = initial_table[list_keywords]
