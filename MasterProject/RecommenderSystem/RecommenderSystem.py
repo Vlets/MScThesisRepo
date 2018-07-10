@@ -1,11 +1,11 @@
-from RecommenderSystem.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
-from RecommenderSystem.DataAlgorithms.CalculateSimilarity import CalculateSimilarity as cs
-from RecommenderSystem.NeuralNetwork.NNModel import NNModel
+from MasterProject.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
+from MasterProject.SimilarityAlgorithms.CalculateSimilarity import CalculateSimilarity as cs
+from MasterProject.NeuralNetwork.NNModel import NNModel
 import pandas as pd
 import numpy as np
 
 
-class RecommenderSystemMain:
+class RecommenderSystem:
     """
     This is the class where the magic happens.
     For, it is only programmed to run with cold-start scenarios and calculate the precision
@@ -23,8 +23,8 @@ class RecommenderSystemMain:
         :return: the given keywords if true; else an empty list.
         This will later help in deleting the unwanted items.
         """
-        ls1 = [element for element in lst1 if element in self.predicted_keywords]
-        ls2 = [element for element in self.predicted_keywords if element in lst1]
+        ls1 = sorted([element for element in lst1 if element in self.predicted_keywords])
+        ls2 = sorted([element for element in self.predicted_keywords if element in lst1])
 
         if ls1 == ls2 and ls1 != []:
             return lst1
@@ -33,17 +33,17 @@ class RecommenderSystemMain:
             return []
 
     @staticmethod
-    def get_seen_items_table_list(table, it_table):
+    def get_seen_items_table_list(table, items_table):
         """
         This method creates a data frame and list of all items in the
         transactionPath column values in the given table.
         :param table: Table with the transaction paths to check the items
-        :param it_table: The items table which s used to identify the items in the table
+        :param items_table: The items table which s used to identify the items in the table
         :return: Data frame and a list of the seen items.
         """
         lst = PreprocessingData.create_list_all_possible_values(table, 'transactionPath')
-        lst = [x for x in lst if x in it_table.pageUrl.unique().tolist()]
-        table_result = it_table.loc[it_table['pageUrl'].isin(lst)][['pageUrl', 'keywords']]
+        lst = [x for x in lst if x in items_table.pageUrl.unique().tolist()]
+        table_result = items_table.loc[items_table['pageUrl'].isin(lst)][['pageUrl', 'keywords']]
 
         return table_result, lst
 
@@ -99,7 +99,7 @@ class RecommenderSystemMain:
 
         # Get visitor past viewed items from the initial_table
         user_previous_paths = initial_table.loc[initial_table['visitorId'] == user_id]
-        user_seen_items_table, user_seen_items_list = RecommenderSystemMain.get_seen_items_table_list(
+        user_seen_items_table, user_seen_items_list = RecommenderSystem.get_seen_items_table_list(
             user_previous_paths, items_table)
         user_seen_items_table = user_seen_items_table.reset_index(drop=True)
 
@@ -132,11 +132,12 @@ class RecommenderSystemMain:
         predicted_keywords = [list_keywords[x] for x in predicted_keywords_indexes]
         self.predicted_keywords = predicted_keywords
 
-    def create_and_train_NN(self, dnn_model, training_data, training_keywords):
+    @staticmethod
+    def create_and_train_NN(nn_model, training_data, training_keywords):
         """
         This method creates and trains a Neural Network model with the
         given data
-        :param dnn_model: Class used to create and train the Neural Network
+        :param nn_model: Class used to create and train the Neural Network
         :param training_data: Data used for training as input data
         :param training_keywords: Data used for training as output data
         :return: Nothing
@@ -146,9 +147,9 @@ class RecommenderSystemMain:
 
         keywords_rows, keywords_columns = training_keywords.shape
 
-        dnn_model.create_model(data_columns, keywords_columns)
+        nn_model.create_model(data_columns, keywords_columns)
 
-        dnn_model.train_model(training_data, training_keywords)
+        nn_model.train_model(training_data, training_keywords)
 
     @staticmethod
     def calculate_similarities(filtered_items_tuples, seen_items_keywords):
@@ -167,76 +168,23 @@ class RecommenderSystemMain:
 
         return final_result_items
 
-    @staticmethod
-    def prepare_user_test_data(initial_table, items_table, list_keywords, user_id):
-        """
-        This method prepares the data to be used when evaluating the precision
-        of the system in cold-start scenarios
-        :param initial_table: The whole data set
-        :param items_table: The items table
-        :param list_keywords: List of all possible keywords based on the items
-        table
-        :param user_id: The id of user to be used when evaluating the precision
-        in cold-start scenarios
-        :return: A list of items seen bu the user with id user_id; The whole
-        data set with changes; The keywords from the items actually seen
-        by the user; The data about the user; The id of user
-        """
+    def suggest_items(self, initial_table, items_table, list_keywords, prediction_testing_data, user_id):
 
-        # Get previous visits from user with user_id into a table
-        user_visits = initial_table[initial_table['visitorId'] == user_id]
+        # Get the predicted keywords
+        self.turn_predicted_keywords_to_string_values(list_keywords, prediction_testing_data)
 
-        # Get the indexes of the user from the initial_table
-        user_indexes = user_visits.index.values.tolist()
+        # Get the table with seen items from user past visits and table with unseen items
+        items_with_predicted_keywords, user_seen_items_table = self.get_seen_unseen_items(initial_table, items_table,
+                                                                                          user_id)
 
-        # Choose visit to keep in initial_table
-        index_to_drop = user_indexes[0]
+        # Prepare the data to then calculate similarities
+        filtered_items_tuples, seen_items_keywords = self.prepare_data_to_calculate_similarity(
+            items_with_predicted_keywords, user_seen_items_table)
 
-        # Drop the visit to keep in initial_table from user_visits table
-        user_visits = user_visits.drop(index_to_drop)
+        # Calculate similarities based on their keywords
+        final_result_items = self.calculate_similarities(filtered_items_tuples, seen_items_keywords)
 
-        # Remove the index of visit to keep from lis of indexes of user in initial_table
-        user_indexes.remove(index_to_drop)
-
-        # From the user_visits table, get the items he has seen
-        actual_seen_items_table, actual_seen_items_list = RecommenderSystemMain.get_seen_items_table_list(user_visits,
-                                                                                                          items_table)
-        user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(user_visits, 'keywords')
-
-        # Drop the unwanted visits from initial_table
-        initial_table = initial_table.drop(user_indexes).reset_index(drop=True)
-
-        user_visits = user_visits.drop(columns=list_keywords)
-        user_visits = user_visits.drop(columns=['keywords', 'transactionPath', 'visitorId'])
-
-        return actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_id
-
-    @staticmethod
-    def precision_main(initial_table, items_table, list_keywords, user_id, k):
-        """
-        This method runs the precision evaluation. Both for predicting the actual items
-        and the actual keywords.
-        :param initial_table: The whole data base used for the evaluation
-        :param items_table: The items found in the whole data base
-        :param list_keywords: The all possible keywords from the items table
-        :param user_id: The id of user to test
-        :param k: Top k items to check the precision
-        :return: The precision of predicting the items and precision of predicting the keywords
-        """
-        actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_id = \
-            RecommenderSystemMain.prepare_user_test_data(initial_table, items_table, list_keywords, user_id)
-
-        main = RecommenderSystemMain()
-
-        final_result_items = main.run_main(initial_table, items_table, list_keywords, user_visits, user_id)
-
-        correctly_predicted_items = [x for x in final_result_items if x in actual_seen_items_list]
-        indexes = [final_result_items.index(value) for value in correctly_predicted_items]
-
-        count_correct_guessed_items = len([x for x in indexes if x < k])
-        count_correct_guessed_keywords = len([x for x in main.predicted_keywords if x in user_actual_seen_keywords])
-
-        return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords)
+        return final_result_items
 
     def run_main(self, initial_table, items_table, list_keywords, user_data, user_id):
         """
@@ -263,17 +211,9 @@ class RecommenderSystemMain:
         # The predictions from the NN based on the given input
         prediction_testing_data = nn_model.predict_values(testing_data)
 
-        # Get the predicted keywords
-        self.turn_predicted_keywords_to_string_values(list_keywords, prediction_testing_data)
-
-        # Get the table with seen items from user past visits and table with unseen items
-        items_with_predicted_keywords, user_seen_items_table = self.get_seen_unseen_items(initial_table, items_table,
-                                                                                          user_id)
-        # Prepare the data to then calculate similarities
-        filtered_items_tuples, seen_items_keywords = self.prepare_data_to_calculate_similarity(
-            items_with_predicted_keywords, user_seen_items_table)
-
-        # Calculate similarities based on their keywords
-        final_result_items = self.calculate_similarities(filtered_items_tuples, seen_items_keywords)
+        final_result_items = self.suggest_items(initial_table, items_table, list_keywords, prediction_testing_data,
+                                                user_id)
 
         return final_result_items
+
+

@@ -1,7 +1,7 @@
 from pandas.io.json import json_normalize
-from RecommenderSystem.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
-from RecommenderSystem.DataAlgorithms.NormalizePersona import NormalizePersona
-from RecommenderSystem.PreprocessingAlgorithms.ReadingFiles import ReadingFiles as rf
+from MasterProject.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
+from MasterProject.DataAlgorithms.NormalizePersona import NormalizePersona
+from MasterProject.PreprocessingAlgorithms.ReadingFiles import ReadingFiles as rf
 
 uri = 'mysql://root:123bloom@127.0.0.1/bloomreachdatabase'
 

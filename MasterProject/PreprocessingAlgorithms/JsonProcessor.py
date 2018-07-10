@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from RecommenderSystem.DataAlgorithms import UrlKeywordExtractor as urlExtract
+from MasterProject.DataAlgorithms import UrlKeywordExtractor as urlExtract
 from pandas.io.json import json_normalize
-from RecommenderSystem.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
+from MasterProject.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
 
 
 class JsonProcessor:

@@ -1,4 +1,4 @@
-from RecommenderSystem.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
+from MasterProject.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
@@ -125,8 +125,8 @@ class NNModel:
         :return: The prediction made with binary values
         """
         prediction = self.model.predict(input_x)
-        prediction[prediction >= 0.5] = 1
-        prediction[prediction < 0.5] = 0
+        prediction[prediction >= 0.47] = 1
+        prediction[prediction < 0.47] = 0
 
         return prediction
 

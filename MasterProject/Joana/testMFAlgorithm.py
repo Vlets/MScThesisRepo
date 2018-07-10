@@ -1,12 +1,12 @@
 import pandas as pd
-import RecommenderSystem.dataFiles.mockData as dataFiles
-from RecommenderSystem.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
-from RecommenderSystem.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
+import MasterProject.dataFiles.mockData as dataFiles
+from MasterProject.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
+from MasterProject.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
 import time
 
 dataFrameMock = pd.DataFrame(dataFiles.mockData)
 dataFrameMock2 = pd.DataFrame(dataFiles.mockData2)
-path = "/Users/george/PycharmProjects/scikitLiterallyLearn/RecommenderSystem/dataFiles/test2.json"
+path = "/Users/george/PycharmProjects/scikitLiterallyLearn/MasterProject/dataFiles/test2.json"
 
 jsonTools = JsonProcessor()
 

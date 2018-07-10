@@ -1,8 +1,8 @@
 import unittest
 import pandas as pd
-import RecommenderSystem.dataFiles.mockData as dataFiles
-from RecommenderSystem.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
-from RecommenderSystem.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
+import MasterProject.dataFiles.mockData as dataFiles
+from MasterProject.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
+from MasterProject.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
 
 
 # Maximal Forward Reference algorithm will be referred to as: MFA or mfa
@@ -65,7 +65,7 @@ class UnitTests(unittest.TestCase):
     # of unique visitorIds in the initial dataFrame.
     def test_did_we_miss_visitors(self):
         sortedData = self.jsonTools.read_and_sort_data(
-            "/Users/george/PycharmProjects/scikitLiterallyLearn/RecommenderSystem/dataFiles/test2.json")
+            "/Users/george/PycharmProjects/scikitLiterallyLearn/MasterProject/dataFiles/test2.json")
         mockResult = mfa.init_algorithm(sortedData)
         self.assertTrue(len(mockResult) == sortedData['visitorId'].nunique())
 

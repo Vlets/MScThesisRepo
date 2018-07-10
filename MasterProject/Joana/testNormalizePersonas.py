@@ -1,5 +1,5 @@
-from RecommenderSystem.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
-from RecommenderSystem.DataAlgorithms.NormalizePersona import NormalizePersona
+from MasterProject.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
+from MasterProject.DataAlgorithms.NormalizePersona import NormalizePersona
 
 json_Tools = JsonProcessor()
 
