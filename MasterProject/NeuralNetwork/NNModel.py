@@ -125,8 +125,8 @@ class NNModel:
         :return: The prediction made with binary values
         """
         prediction = self.model.predict(input_x)
-        prediction[prediction >= 0.47] = 1
-        prediction[prediction < 0.47] = 0
+        prediction[prediction >= 0.48] = 1
+        prediction[prediction < 0.48] = 0
 
         return prediction
 

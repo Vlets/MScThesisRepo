@@ -111,4 +111,4 @@ def run_evaluation():
 
     return precision_items, precision_keywords
 
-precision_items, precision_keywords = run_evaluation()
+# precision_items, precision_keywords = run_evaluation()

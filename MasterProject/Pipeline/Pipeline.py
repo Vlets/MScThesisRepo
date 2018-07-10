@@ -70,8 +70,10 @@ def run_pipeline():
 
     correctly_predicted_items = [x for x in suggested_items if x in actual_seen_items_list]
     indexes = [suggested_items.index(value) for value in correctly_predicted_items]
+    guessed_correctly_keywords = [x for x in main.predicted_keywords if x in user_actual_seen_keywords]
 
-    return suggested_items, correctly_predicted_items, indexes
+    return suggested_items, correctly_predicted_items, indexes, guessed_correctly_keywords, main.predicted_keywords
 
 
-suggested_items, correctly_guessed_items, indexes_of_correctly_guessed_items = run_pipeline()
+suggested_items, correctly_guessed_items, indexes_of_correctly_guessed_items, correctly_guessed_keywords, \
+    predicted_keywords = run_pipeline()
