@@ -13,6 +13,8 @@ class NNModel:
 
     def __init__(self):
         self.model = None
+        seed = 8
+        np.random.seed(seed)
 
     @staticmethod
     def shows_graphs(history):
