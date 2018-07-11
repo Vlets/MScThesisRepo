@@ -101,7 +101,6 @@ class RecommenderSystem:
         user_previous_paths = initial_table.loc[initial_table['visitorId'] == user_id]
         user_seen_items_table, user_seen_items_list = RecommenderSystem.get_seen_items_table_list(
             user_previous_paths, items_table)
-        user_seen_items_table = user_seen_items_table.reset_index(drop=True)
 
         # Remove the seen items in filtered items
         items_with_predicted_keywords = items_with_predicted_keywords[
