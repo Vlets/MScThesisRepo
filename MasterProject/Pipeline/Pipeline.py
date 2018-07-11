@@ -3,20 +3,11 @@ from MasterProject.Evaluation.PrecisionEvaluation import prepare_training_testin
 from MasterProject.RecommenderSystem.RecommenderSystem import RecommenderSystem
 import pandas as pd
 
-url = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
-url_no_trans = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
-url_after_everything = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
-url_items_file = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
-url_to_save = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
-
-
-def data_pre_process():
-    pre_data = PreprocessingData()
-
-    pre_data.json_files_pre_process(url, url_no_trans, url_after_everything)
-
-    # Process the data to be acceptable by the DNN
-    pre_data.create_items_table_and_one_hot_encoding(url_no_trans, url_after_everything, url_items_file, url_to_save)
+original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
+no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
+normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
+items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
+all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
 
 
 """def prepare_training_testing_data(initial_table, list_keywords, user_id):
@@ -47,16 +38,16 @@ def data_pre_process():
 
 def run_pipeline():
     # 1st, pre-process the whole data
-    # data_pre_process()
+    # pre_data = PreprocessingData()
+    # pre_data.data_pre_process(original_data_path, no_transactions_file_path, normalized_personas_file_path,
+    #                          items_file_path, all_data_processed_file_path)
 
     # 2nd, initialize the recommender system
     main = RecommenderSystem()
 
     # 3rd, gather all the processed data
-    initial_table = pd.read_json(url_to_save).reset_index(drop=True)
-
-    items_table = pd.read_json(url_items_file).reset_index(drop=True)
-
+    initial_table = pd.read_json(all_data_processed_file_path).reset_index(drop=True)
+    items_table = pd.read_json(items_file_path).reset_index(drop=True)
     list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'keywords')
 
     # 4th, prepare the training and testing data
@@ -70,10 +61,10 @@ def run_pipeline():
 
     correctly_predicted_items = [x for x in suggested_items if x in actual_seen_items_list]
     indexes = [suggested_items.index(value) for value in correctly_predicted_items]
-    guessed_correctly_keywords = [x for x in main.predicted_keywords if x in user_actual_seen_keywords]
+    predicted_correctly_keywords = [x for x in main.predicted_keywords if x in user_actual_seen_keywords]
 
-    return suggested_items, correctly_predicted_items, indexes, guessed_correctly_keywords, main.predicted_keywords
+    return suggested_items, correctly_predicted_items, indexes, predicted_correctly_keywords, main.predicted_keywords
 
 
-suggested_items, correctly_guessed_items, indexes_of_correctly_guessed_items, correctly_guessed_keywords, \
+returned_items, correctly_guessed_items, indexes_of_correctly_guessed_items, correctly_guessed_keywords, \
     predicted_keywords = run_pipeline()

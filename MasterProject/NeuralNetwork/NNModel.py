@@ -1,4 +1,3 @@
-from MasterProject.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
@@ -13,7 +12,7 @@ class NNModel:
 
     def __init__(self):
         self.model = None
-        seed = 8
+        seed = 7
         np.random.seed(seed)
 
     @staticmethod

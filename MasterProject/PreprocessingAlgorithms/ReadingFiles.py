@@ -22,7 +22,7 @@ class ReadingFiles:
         index = 0
         data_json = []
 
-        while (index < len(query)):
+        while index < len(query):
             j = query.at[index, column]
             my_json = j.decode('utf8')
             data = json.loads(my_json)

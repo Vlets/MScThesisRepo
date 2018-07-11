@@ -3,11 +3,11 @@ from MasterProject.RecommenderSystem.RecommenderSystem import RecommenderSystem
 import pandas as pd
 
 # Process the data
-url = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
-url_no_trans = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
-url_after_everything = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
-url_items_file = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
-url_to_save = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
+original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
+no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
+normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
+items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
+all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
 
 
 def prepare_training_testing_data(initial_table, items_table, list_keywords, user_id):
@@ -29,16 +29,16 @@ def prepare_training_testing_data(initial_table, items_table, list_keywords, use
     user_visits = initial_table[initial_table['visitorId'] == user_id]
 
     # Get the indexes of the user from the initial_table
-    user_indexes = user_visits.index.values.tolist()
+    user_indexes_in_initial_table = user_visits.index.values.tolist()
 
     # Choose visit to keep in initial_table
-    index_to_drop = user_indexes[0]
+    index_to_keep_in_initial_table = user_indexes_in_initial_table[0]
 
     # Drop the visit to keep in initial_table from user_visits table
-    user_visits = user_visits.drop(index_to_drop)
+    user_visits = user_visits.drop(index_to_keep_in_initial_table)
 
     # Remove the index of visit to keep from list of indexes of user in initial_table
-    user_indexes.remove(index_to_drop)
+    user_indexes_in_initial_table.remove(index_to_keep_in_initial_table)
 
     # From the user_visits table, get the items he has seen
     actual_seen_items_table, actual_seen_items_list = RecommenderSystem.get_seen_items_table_list(user_visits,
@@ -46,7 +46,7 @@ def prepare_training_testing_data(initial_table, items_table, list_keywords, use
     user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(user_visits, 'keywords')
 
     # Drop the unwanted visits from initial_table
-    initial_table = initial_table.drop(user_indexes).reset_index(drop=True)
+    initial_table = initial_table.drop(user_indexes_in_initial_table).reset_index(drop=True)
 
     user_visits = user_visits.drop(columns=list_keywords)
     user_visits = user_visits.drop(columns=['keywords', 'transactionPath', 'visitorId'])
@@ -82,8 +82,8 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
 
 
 def run_evaluation():
-    initial_table = pd.read_json(url_to_save).reset_index(drop=True)
-    items_table = pd.read_json(url_items_file).reset_index(drop=True)
+    initial_table = pd.read_json(all_data_processed_file_path).reset_index(drop=True)
+    items_table = pd.read_json(items_file_path).reset_index(drop=True)
 
     list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'keywords')
 

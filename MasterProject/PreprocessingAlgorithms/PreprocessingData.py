@@ -9,6 +9,7 @@ class PreprocessingData:
     def __init__(self):
         self.items_table = None
         self.json_tools = JsonProcessor()
+        self.list_keywords = None
 
     @staticmethod
     def remove_duplicates(duplicate):
@@ -18,46 +19,45 @@ class PreprocessingData:
                 final_list.append(num)
         return final_list
 
-    @staticmethod
-    def NN_format_preprocess(data_to_process):
-        result_cities = pd.get_dummies(data_to_process['geo_city'])
-        result_cities = result_cities.rename(columns={"": "None_City"})
-        result_continent = pd.get_dummies(data_to_process['geo_continent'])
-        result_continent = result_continent.rename(columns={"": "None_Continent", "SA": "SA_Continent"})
-        result_country = pd.get_dummies(data_to_process['geo_country'])
-        result_country = result_country.rename(columns={"": "None_Country"})
-        result_persona_id = pd.get_dummies(data_to_process['personaIdScores_id'])
-        result_persona_id = result_persona_id.rename(columns={"None": "None_PI"})
-        result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
-        result_global_persona_id = result_global_persona_id.rename(columns={"None": "None_GPI"})
-        users_table = data_to_process.drop(columns=['geo_city', 'geo_continent', 'geo_country', 'personaIdScores_id',
-                                                    'globalPersonaIdScores_id'])
-        users_table = pd.concat([users_table,
-                                 result_cities, result_continent, result_country,
-                                 result_persona_id,
-                                 result_global_persona_id
-                                 ], axis=1)
-        return users_table
+    def one_hot_encoding_process(self, sortedData):
+        """
 
-    def one_hot_encoding_process(self, list_keywords, sortedData):
-        keywords_table = self.create_one_hot_encoding_table(list_keywords, sortedData, 'keywords')
-        sortedData = PreprocessingData.NN_format_preprocess(sortedData)
+        :param list_keywords:
+        :param sortedData:
+        :return:
+        """
+        keywords_table = self.create_one_hot_encoding_table(self.list_keywords, sortedData, 'keywords')
+        sortedData = PreprocessingData.nn_format_preprocess(sortedData)
         sortedData = pd.concat([sortedData, keywords_table], axis=1)
         return sortedData
 
-    def remove_unwanted_rows(self, sortedData):
-        sortedData['transactionPath'] = sortedData.transactionPath.apply(self.to_apply_has_seen_items_function)
-        sortedData = sortedData[sortedData.astype(str)['transactionPath'] != '[]'].reset_index(drop=True)
-        return sortedData
+    def remove_unwanted_rows(self, sorted_data):
+        """
+
+        :param sorted_data:
+        :return:
+        """
+        sorted_data['transactionPath'] = sorted_data.transactionPath.apply(self.has_seen_items)
+        sorted_data = sorted_data[sorted_data.astype(str)['transactionPath'] != '[]'].reset_index(drop=True)
+        return sorted_data
 
     def create_items_table(self, file_after_processing, file_no_transactions, items_file_name):
+        """
+
+        :param file_after_processing:
+        :param file_no_transactions:
+        :param items_file_name:
+        :return:
+        """
         table_no_paths = pd.read_json(file_no_transactions).reset_index(drop=True)
-        sortedData = pd.read_json(file_after_processing).reset_index(drop=True)
+        sorted_data = pd.read_json(file_after_processing).reset_index(drop=True)
         items_table = JsonProcessor.make_items_table(table_no_paths)
+        list_keywords = self.create_list_all_possible_values(items_table, 'keywords')
         self.items_table = items_table
+        self.list_keywords = list_keywords
         items_table.to_json(items_file_name)
 
-        return items_table, sortedData
+        return sorted_data
 
     @staticmethod
     def create_list_all_possible_values(given_table, column_name):
@@ -72,29 +72,20 @@ class PreprocessingData:
         values = PreprocessingData.remove_duplicates(values)
         return values
 
-    @staticmethod
-    def has_seen_items(path, items_table):
+    def has_seen_items(self, path):
         """
 
         :param path:
         :param items_table:
         :return:
         """
-        result = items_table.loc[items_table['pageUrl'].isin(path)]
+        result = self.items_table.loc[self.items_table['pageUrl'].isin(path)]
 
         if result.empty:
             return []
 
         else:
             return path
-
-    def to_apply_has_seen_items_function(self, lst1):
-        """
-
-        :param lst1:
-        :return:
-        """
-        return PreprocessingData.has_seen_items(lst1, self.items_table)
 
     @staticmethod
     def create_one_hot_encoding_table(values_list, given_table, column_name):
@@ -118,31 +109,71 @@ class PreprocessingData:
 
         return ohe_table
 
-    def create_items_table_and_one_hot_encoding(self, file_no_transactions, file_after_processing, items_file_name,
-                                                file_path_to_save):
+    @staticmethod
+    def nn_format_preprocess(data_to_process):
         """
 
-        :param file_no_transactions:
-        :param file_after_processing:
-        :param items_file_name:
-        :param file_path_to_save:
+        :param data_to_process:
         :return:
         """
-        items_table, sortedData = self.create_items_table(file_after_processing, file_no_transactions, items_file_name)
-        list_keywords = self.create_list_all_possible_values(items_table, 'keywords')
-        sortedData = self.remove_unwanted_rows(sortedData)
-        sortedData = self.one_hot_encoding_process(list_keywords, sortedData)
-        sortedData.to_json(file_path_to_save)
+        result_cities = pd.get_dummies(data_to_process['geo_city'])
+        result_cities = result_cities.rename(columns={"": "None_City"})
+        result_continent = pd.get_dummies(data_to_process['geo_continent'])
+        result_continent = result_continent.rename(columns={"": "None_Continent", "SA": "SA_Continent"})
+        result_country = pd.get_dummies(data_to_process['geo_country'])
+        result_country = result_country.rename(columns={"": "None_Country"})
+        result_persona_id = pd.get_dummies(data_to_process['personaIdScores_id'])
+        result_persona_id = result_persona_id.rename(columns={"None": "None_PI"})
+        result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
+        result_global_persona_id = result_global_persona_id.rename(columns={"None": "None_GPI"})
+        users_table = data_to_process.drop(columns=['geo_city', 'geo_continent', 'geo_country', 'personaIdScores_id',
+                                                    'globalPersonaIdScores_id'])
+        users_table = pd.concat([users_table,
+                                 result_cities, result_continent, result_country,
+                                 result_persona_id,
+                                 result_global_persona_id
+                                 ], axis=1)
+        return users_table
 
-    def json_files_pre_process(self, name_file, file_to_save, file_after_everything):
+    def create_items_table_and_one_hot_encoding(self, no_transactions_file_path, normalized_persona_file_path,
+                                                items_file_path, all_data_processed_file_path):
         """
 
-        :param name_file:
-        :param file_to_save:
-        :param file_after_everything:
+        :param no_transactions_file_path:
+        :param normalized_persona_file_path:
+        :param items_file_path:
+        :param all_data_processed_file_path:
         :return:
         """
-        sortedData = self.json_tools.json_files_pre_processing(name_file, file_to_save)
-        sortedData = NormalizePersona.normalize_table_personas(sortedData)
-        sortedData.to_json(file_after_everything)
+        sorted_data = self.create_items_table(normalized_persona_file_path, no_transactions_file_path, items_file_path)
+        sorted_data = self.remove_unwanted_rows(sorted_data)
+        sorted_data = self.one_hot_encoding_process(sorted_data)
+        sorted_data.to_json(all_data_processed_file_path)
 
+    def json_files_pre_process(self, original_data_path, no_transactions_file_path, normalized_personas_file_path):
+        """
+
+        :param original_data_path:
+        :param no_transactions_file_path:
+        :param normalized_personas_file_path:
+        :return:
+        """
+        sorted_data = self.json_tools.json_files_pre_processing(original_data_path, no_transactions_file_path)
+        sorted_data = NormalizePersona.normalize_table_personas(sorted_data)
+        sorted_data.to_json(normalized_personas_file_path)
+
+    def data_pre_process(self, original_data_path, no_transactions_file_path, normalized_personas_file_path,
+                         items_file_path, all_data_processed_file_path):
+        """
+
+        :param original_data_path:
+        :param no_transactions_file_path:
+        :param normalized_personas_file_path:
+        :param items_file_path:
+        :param all_data_processed_file_path:
+        :return:
+        """
+
+        self.json_files_pre_process(original_data_path, no_transactions_file_path, normalized_personas_file_path)
+        self.create_items_table_and_one_hot_encoding(no_transactions_file_path, normalized_personas_file_path,
+                                                     items_file_path, all_data_processed_file_path)

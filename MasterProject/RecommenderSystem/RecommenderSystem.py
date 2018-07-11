@@ -14,20 +14,20 @@ class RecommenderSystem:
     def __init__(self):
         self.predicted_keywords = None
 
-    def to_filter_function(self, lst1):
+    def to_filter_items_function(self, list_keywords):
         """
         This method is used to help filter out the unwanted items.
         It checks if the item has at least one of the predicted keywords.
-        :param lst1: keywords associated to a specific item
+        :param list_keywords: keywords associated to a specific item
         :param self.predicted_keywords: predicted keywords from the NN
         :return: the given keywords if true; else an empty list.
         This will later help in deleting the unwanted items.
         """
-        ls1 = sorted([element for element in lst1 if element in self.predicted_keywords])
-        ls2 = sorted([element for element in self.predicted_keywords if element in lst1])
+        ls1 = sorted([element for element in list_keywords if element in self.predicted_keywords])
+        ls2 = sorted([element for element in self.predicted_keywords if element in list_keywords])
 
         if ls1 == ls2 and ls1 != []:
-            return lst1
+            return list_keywords
 
         else:
             return []
@@ -93,7 +93,7 @@ class RecommenderSystem:
         # Get table with items that have the keywords found previously
         items_with_predicted_keywords = items_table.copy()
         items_with_predicted_keywords['keywords'] = items_with_predicted_keywords.keywords.apply(
-            self.to_filter_function)
+            self.to_filter_items_function)
         items_with_predicted_keywords = items_with_predicted_keywords[
             items_with_predicted_keywords.astype(str)['keywords'] != '[]'].reset_index(drop=True)
 
@@ -133,7 +133,7 @@ class RecommenderSystem:
         self.predicted_keywords = predicted_keywords
 
     @staticmethod
-    def create_and_train_NN(nn_model, training_data, training_keywords):
+    def create_and_train_nn(nn_model, training_data, training_keywords):
         """
         This method creates and trains a Neural Network model with the
         given data
@@ -203,7 +203,7 @@ class RecommenderSystem:
         testing_data = user_data.iloc[:, :].values
 
         # Create and train the NN model
-        self.create_and_train_NN(nn_model, training_data, training_keywords)
+        self.create_and_train_nn(nn_model, training_data, training_keywords)
 
         # The chosen input data to give to NN to predict
         testing_data = np.array([testing_data[0].tolist()])

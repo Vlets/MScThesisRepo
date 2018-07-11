@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from MasterProject.DataAlgorithms import UrlKeywordExtractor as urlExtract
 from pandas.io.json import json_normalize
 from MasterProject.DataAlgorithms.MFAlgorithm import MFAlgorithm as mfa
@@ -97,5 +96,6 @@ class JsonProcessor:
         items_table = items_table[keep_columns]
         items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
         items_table = items_table.drop(columns='visitorId')
+
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 
