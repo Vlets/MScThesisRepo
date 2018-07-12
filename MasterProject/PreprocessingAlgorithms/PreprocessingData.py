@@ -50,7 +50,7 @@ class PreprocessingData:
 
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 
-    def create_items_table(self, file_after_processing, file_no_transactions, items_file_name):
+    def create_items_table(self, file_no_transactions, items_file_name):
         """
 
         :param file_after_processing:
@@ -59,14 +59,12 @@ class PreprocessingData:
         :return:
         """
         table_no_paths = pd.read_json(file_no_transactions).reset_index(drop=True)
-        sorted_data = pd.read_json(file_after_processing).reset_index(drop=True)
         items_table = PreprocessingData.make_items_table(table_no_paths)
         list_keywords = self.create_list_all_possible_values(items_table, 'keywords')
         self.items_table = items_table
         self.list_keywords = list_keywords
         items_table.to_json(items_file_name)
 
-        return sorted_data
 
     @staticmethod
     def create_list_all_possible_values(given_table, column_name):
@@ -154,7 +152,8 @@ class PreprocessingData:
         :param all_data_processed_file_path:
         :return:
         """
-        sorted_data = self.create_items_table(normalized_persona_file_path, no_transactions_file_path, items_file_path)
+        sorted_data = pd.read_json(normalized_persona_file_path).reset_index(drop=True)
+        self.create_items_table(no_transactions_file_path, items_file_path)
         sorted_data = self.remove_unwanted_rows(sorted_data)
         sorted_data = self.one_hot_encoding_process(sorted_data)
         sorted_data.to_json(all_data_processed_file_path)
