@@ -1,6 +1,8 @@
 from MasterProject.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
-import pandas as pd
 from MasterProject.RecommenderSystem.RecommenderSystem import RecommenderSystem
+from MasterProject.NeuralNetwork.NNModel import NNModel
+import pandas as pd
+import numpy as np
 
 url = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
 url_no_trans = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
@@ -59,12 +61,12 @@ user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(us
 # Drop the unwanted visits from initial_table
 initial_table = initial_table.drop(user_indexes).reset_index(drop=True)
 
-#user_visits_keywords = user_visits[list_keywords]
+user_visits_keywords = user_visits[list_keywords]
 
 user_visits = user_visits.drop(columns=list_keywords)
 user_visits = user_visits.drop(columns=['keywords', 'transactionPath', 'visitorId'])
 
-"""
+
 nn_model = NNModel()
 
 # Data used to train the DNN.
@@ -72,7 +74,7 @@ training_data, training_keywords = nn_model.split_users_data_and_keywords_data(i
 testing_data = user_visits.iloc[:, :].values
 
 create_and_train_NN(nn_model, training_data, training_keywords)
-testing_data = np.array([testing_data[0].tolist()])
+# testing_data = np.array([testing_data[0].tolist()])
 
 # The predictions from the NN based on the given input
 prediction_testing_data = nn_model.predict_values(testing_data)
@@ -82,4 +84,3 @@ predictions_as_table = pd.DataFrame(prediction_testing_data)
 # Delete the columns with only 0 as their values
 # predictions_as_table = predictions_as_table.loc[:, (predictions_as_table >= 0.5).any(axis=0)]
 
-"""

@@ -14,6 +14,14 @@ class RecommenderSystem:
     def __init__(self):
         self.predicted_keywords = None
 
+    @staticmethod
+    def remove_duplicates(duplicate):
+        final_list = []
+        for num in duplicate:
+            if num not in final_list:
+                final_list.append(num)
+        return final_list
+
     def to_filter_items_function(self, list_keywords):
         """
         This method is used to help filter out the unwanted items.
@@ -163,7 +171,7 @@ class RecommenderSystem:
 
         final_result = sorted(cs.similarity_results(seen_items_keywords, filtered_items_tuples))[::-1]
         final_result_items = [y for x, y in final_result]
-        final_result_items = PreprocessingData.remove_duplicates(final_result_items)
+        final_result_items = RecommenderSystem.remove_duplicates(final_result_items)
 
         return final_result_items
 

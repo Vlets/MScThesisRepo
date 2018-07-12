@@ -11,14 +11,6 @@ class PreprocessingData:
         self.json_tools = JsonProcessor()
         self.list_keywords = None
 
-    @staticmethod
-    def remove_duplicates(duplicate):
-        final_list = []
-        for num in duplicate:
-            if num not in final_list:
-                final_list.append(num)
-        return final_list
-
     def one_hot_encoding_process(self, sortedData):
         """
 
@@ -69,7 +61,7 @@ class PreprocessingData:
         """
         values_as_list = [x for x in given_table[column_name].values.tolist() if str(x) != 'nan']
         values = [item for sublist in values_as_list for item in sublist]
-        values = PreprocessingData.remove_duplicates(values)
+        values = sorted(set(values))
         return values
 
     def has_seen_items(self, path):
