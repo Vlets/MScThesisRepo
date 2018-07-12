@@ -20,7 +20,7 @@ class PreprocessingData:
         :return:
         """
         keywords_table = self.create_one_hot_encoding_table(self.list_keywords, sortedData, 'keywords')
-        sortedData = PreprocessingData.nn_format_preprocess(sortedData)
+        sortedData = PreprocessingData.nn_format_pre_process(sortedData)
         sortedData = pd.concat([sortedData, keywords_table], axis=1)
         return sortedData
 
@@ -119,7 +119,7 @@ class PreprocessingData:
         return ohe_table
 
     @staticmethod
-    def nn_format_preprocess(data_to_process):
+    def nn_format_pre_process(data_to_process):
         """
 
         :param data_to_process:
