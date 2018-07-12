@@ -83,19 +83,4 @@ class JsonProcessor:
         if not to_json:
             sorted_data.to_csv(savepath + ".csv")
 
-    @staticmethod
-    def make_items_table(table):
-        """
-
-        :param table:
-        :return:
-        """
-        keep_page_id = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
-        keep_columns = ['pageUrl', 'visitorId']
-        items_table = table.loc[table['pageId'].isin(keep_page_id)]
-        items_table = items_table[keep_columns]
-        items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
-        items_table = items_table.drop(columns='visitorId')
-
-        return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 

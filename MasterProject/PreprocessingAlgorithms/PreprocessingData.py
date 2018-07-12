@@ -1,5 +1,6 @@
 from MasterProject.PreprocessingAlgorithms.JsonProcessor import JsonProcessor
 from MasterProject.DataAlgorithms.NormalizePersona import NormalizePersona
+from MasterProject.DataAlgorithms import UrlKeywordExtractor as urlExtract
 import pandas as pd
 import numpy as np
 
@@ -33,6 +34,22 @@ class PreprocessingData:
         sorted_data = sorted_data[sorted_data.astype(str)['transactionPath'] != '[]'].reset_index(drop=True)
         return sorted_data
 
+    @staticmethod
+    def make_items_table(table):
+        """
+
+        :param table:
+        :return:
+        """
+        keep_page_id = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
+        keep_columns = ['pageUrl', 'visitorId']
+        items_table = table.loc[table['pageId'].isin(keep_page_id)]
+        items_table = items_table[keep_columns]
+        items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
+        items_table = items_table.drop(columns='visitorId')
+
+        return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
+
     def create_items_table(self, file_after_processing, file_no_transactions, items_file_name):
         """
 
@@ -43,7 +60,7 @@ class PreprocessingData:
         """
         table_no_paths = pd.read_json(file_no_transactions).reset_index(drop=True)
         sorted_data = pd.read_json(file_after_processing).reset_index(drop=True)
-        items_table = JsonProcessor.make_items_table(table_no_paths)
+        items_table = PreprocessingData.make_items_table(table_no_paths)
         list_keywords = self.create_list_all_possible_values(items_table, 'keywords')
         self.items_table = items_table
         self.list_keywords = list_keywords
