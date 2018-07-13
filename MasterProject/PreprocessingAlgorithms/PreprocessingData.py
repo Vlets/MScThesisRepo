@@ -129,16 +129,19 @@ class PreprocessingData:
         result_continent = result_continent.rename(columns={"": "None_Continent", "SA": "SA_Continent"})
         result_country = pd.get_dummies(data_to_process['geo_country'])
         result_country = result_country.rename(columns={"": "None_Country"})
-        result_persona_id = pd.get_dummies(data_to_process['personaIdScores_id'])
-        result_persona_id = result_persona_id.rename(columns={"None": "None_PI"})
-        result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
-        result_global_persona_id = result_global_persona_id.rename(columns={"None": "None_GPI"})
+        # result_persona_id = pd.get_dummies(data_to_process['personaIdScores_id'])
+        # result_persona_id = result_persona_id.rename(columns={"None": "None_PI"})
+        # result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
+        # result_global_persona_id = result_global_persona_id.rename(columns={"None": "None_GPI"})
         users_table = data_to_process.drop(columns=['geo_city', 'geo_continent', 'geo_country', 'personaIdScores_id',
-                                                    'globalPersonaIdScores_id'])
+                                                    'globalPersonaIdScores_id',
+                                                    'personaIdScores_score',
+                                                    'globalPersonaIdScores_score'
+                                                    ])
         users_table = pd.concat([users_table,
                                  result_cities, result_continent, result_country,
-                                 result_persona_id,
-                                 result_global_persona_id
+                                 # result_persona_id,
+                                 # result_global_persona_id
                                  ], axis=1)
         return users_table
 

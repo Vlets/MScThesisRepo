@@ -78,7 +78,8 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
     count_correct_guessed_items = len([x for x in indexes if x < k])
     count_correct_guessed_keywords = len([x for x in main.predicted_keywords if x in user_actual_seen_keywords])
 
-    return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords)
+    return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords), \
+           count_correct_guessed_items / len(final_result_items)
 
 
 def run_evaluation():
@@ -93,6 +94,7 @@ def run_evaluation():
 
     precision_items = []
     precision_keywords = []
+    precision_items_overall = []
 
     i = 0
     visitor_length = len(returning_visitors)
@@ -103,14 +105,15 @@ def run_evaluation():
         initial_table_to_give = initial_table.copy()
         items_table_to_give = items_table.copy()
         list_keywords_to_give = list_keywords.copy()
-        guessed_items, guessed_keywords = precision_main(initial_table_to_give, items_table_to_give,
-                                                         list_keywords_to_give, visitor, 5)
+        guessed_items, guessed_keywords, overall_precision = precision_main(initial_table_to_give, items_table_to_give,
+                                                                            list_keywords_to_give, visitor, 5)
         precision_items.append(guessed_items)
         precision_keywords.append(guessed_keywords)
+        precision_items_overall.append(overall_precision)
         i += 1
         if i % 10 == 0:
             print("Progress Precision:", round((i / visitor_length) * 100, 2), "%")
 
-    return precision_items, precision_keywords
+    return precision_items, precision_keywords, precision_items_overall
 
-# precision_items, precision_keywords = run_evaluation()
+# precision_items, precision_keywords, precision_items_overall = run_evaluation()
