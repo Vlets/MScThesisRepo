@@ -79,7 +79,7 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
     count_correct_guessed_keywords = len([x for x in main.predicted_keywords if x in user_actual_seen_keywords])
 
     return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords), \
-           count_correct_guessed_items / len(final_result_items)
+           len(correctly_predicted_items) / len(final_result_items)
 
 
 def run_evaluation():
@@ -99,14 +99,14 @@ def run_evaluation():
     i = 0
     visitor_length = len(returning_visitors)
 
-    print("Top 5")
+    print("Top 70")
 
     for visitor in returning_visitors:
         initial_table_to_give = initial_table.copy()
         items_table_to_give = items_table.copy()
         list_keywords_to_give = list_keywords.copy()
         guessed_items, guessed_keywords, overall_precision = precision_main(initial_table_to_give, items_table_to_give,
-                                                                            list_keywords_to_give, visitor, 5)
+                                                                            list_keywords_to_give, visitor, 70)
         precision_items.append(guessed_items)
         precision_keywords.append(guessed_keywords)
         precision_items_overall.append(overall_precision)
