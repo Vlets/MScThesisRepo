@@ -1,21 +1,12 @@
-import numpy as np
-
 
 class MFAlgorithm:
-
-    @staticmethod
-    def remove_duplicates(duplicate):
-        final_list = []
-        for num in duplicate:
-            if num not in final_list:
-                final_list.append(num)
-        return final_list
 
 
     @staticmethod
     def run_MF_algorithm(visitor, time, urls):
         """
 
+        :param urls:
         :param visitor:
         :param time:
         :return:

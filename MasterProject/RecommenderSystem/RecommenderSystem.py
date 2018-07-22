@@ -116,7 +116,7 @@ class RecommenderSystem:
 
         return items_with_predicted_keywords, user_seen_items_table
 
-    def turn_predicted_keywords_to_string_values(self, list_keywords, user_keywords_predictions):
+    def turn_predicted_keywords_to_string_values(self, list_keywords, user_keywords_predictions, for_test):
         """
         This method gets the string values of the predicted keywords
         :param list_keywords: Lis of all possible values of keywords
@@ -137,6 +137,10 @@ class RecommenderSystem:
 
         # Get the actual keywords
         predicted_keywords = [list_keywords[x] for x in predicted_keywords_indexes]
+
+        #FOR TESTING PURPOSES ONLY
+        predicted_keywords = [x for x in predicted_keywords if x not in for_test]
+
         self.predicted_keywords = predicted_keywords
 
     @staticmethod
@@ -175,10 +179,10 @@ class RecommenderSystem:
 
         return final_result_items
 
-    def suggest_items(self, initial_table, items_table, list_keywords, prediction_testing_data, user_id):
+    def suggest_items(self, initial_table, items_table, list_keywords, prediction_testing_data, user_id, for_test):
 
         # Get the predicted keywords
-        self.turn_predicted_keywords_to_string_values(list_keywords, prediction_testing_data)
+        self.turn_predicted_keywords_to_string_values(list_keywords, prediction_testing_data, for_test)
 
         # Get the table with seen items from user past visits and table with unseen items
         items_with_predicted_keywords, user_seen_items_table = self.get_seen_unseen_items(initial_table, items_table,
@@ -193,7 +197,7 @@ class RecommenderSystem:
 
         return final_result_items
 
-    def run_main(self, initial_table, items_table, list_keywords, user_data, user_id):
+    def run_recommender_system(self, initial_table, items_table, list_keywords, user_data, user_id, for_test):
         """
         This method runs the whole project. This is how the recommender systems would work.
         :param user_id:
@@ -219,7 +223,7 @@ class RecommenderSystem:
         prediction_testing_data = nn_model.predict_values(testing_data)
 
         final_result_items = self.suggest_items(initial_table, items_table, list_keywords, prediction_testing_data,
-                                                user_id)
+                                                user_id, for_test)
 
         return final_result_items
 

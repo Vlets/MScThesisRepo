@@ -12,8 +12,6 @@ class NNModel:
 
     def __init__(self):
         self.model = None
-        seed = 7
-        np.random.seed(seed)
 
     @staticmethod
     def shows_graphs(history):

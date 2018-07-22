@@ -12,17 +12,16 @@ class PreprocessingData:
         self.json_tools = JsonProcessor()
         self.list_keywords = None
 
-    def one_hot_encoding_process(self, sortedData):
+    def one_hot_encoding_process(self, sorted_data):
         """
 
-        :param list_keywords:
-        :param sortedData:
+        :param sorted_data:
         :return:
         """
-        keywords_table = self.create_one_hot_encoding_table(self.list_keywords, sortedData, 'keywords')
-        sortedData = PreprocessingData.nn_format_pre_process(sortedData)
-        sortedData = pd.concat([sortedData, keywords_table], axis=1)
-        return sortedData
+        keywords_table = self.create_one_hot_encoding_table(self.list_keywords, sorted_data, 'keywords')
+        sorted_data = PreprocessingData.nn_format_pre_process(sorted_data)
+        sorted_data = pd.concat([sorted_data, keywords_table], axis=1)
+        return sorted_data
 
     def remove_unwanted_rows(self, sorted_data):
         """
@@ -42,11 +41,10 @@ class PreprocessingData:
         :return:
         """
         keep_page_id = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
-        keep_columns = ['pageUrl', 'visitorId']
+        keep_columns = ['pageUrl', 'keywords']
         items_table = table.loc[table['pageId'].isin(keep_page_id)]
-        items_table = items_table[keep_columns]
         items_table['keywords'] = items_table.pageUrl.apply(urlExtract.get_keywords, items=True)
-        items_table = items_table.drop(columns='visitorId')
+        items_table = items_table[keep_columns]
 
         return items_table.drop_duplicates('pageUrl').reset_index(drop=True)
 
@@ -126,13 +124,14 @@ class PreprocessingData:
         result_cities = pd.get_dummies(data_to_process['geo_city'])
         result_cities = result_cities.rename(columns={"": "None_City"})
         result_continent = pd.get_dummies(data_to_process['geo_continent'])
-        result_continent = result_continent.rename(columns={"": "None_Continent", "SA": "SA_Continent"})
+        result_continent = result_continent.rename(columns={"": "None_Continent", "SA": "SA_Continent",
+                                                            "NA": "NA_Continent"})
         result_country = pd.get_dummies(data_to_process['geo_country'])
         result_country = result_country.rename(columns={"": "None_Country"})
-        result_persona_id = pd.get_dummies(data_to_process['personaIdScores_id'])
-        result_persona_id = result_persona_id.rename(columns={"None": "None_PI"})
-        result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
-        result_global_persona_id = result_global_persona_id.rename(columns={"None": "None_GPI"})
+        # result_persona_id = pd.get_dummies(data_to_process['personaIdScores_id'])
+        # result_persona_id = result_persona_id.rename(columns={"None": "None_PI"})
+        # result_global_persona_id = pd.get_dummies(data_to_process['globalPersonaIdScores_id'])
+        # result_global_persona_id = result_global_persona_id.rename(columns={"None": "None_GPI"})
         users_table = data_to_process.drop(columns=['geo_city', 'geo_continent', 'geo_country', 'personaIdScores_id',
                                                     'globalPersonaIdScores_id',
                                                     'personaIdScores_score',
@@ -140,8 +139,8 @@ class PreprocessingData:
                                                     ])
         users_table = pd.concat([users_table,
                                  result_cities, result_continent, result_country,
-                                 result_persona_id,
-                                 result_global_persona_id
+                                 # result_persona_id,
+                                 # result_global_persona_id
                                  ], axis=1)
         return users_table
 

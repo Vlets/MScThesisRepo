@@ -1,6 +1,7 @@
 from MasterProject.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
 from MasterProject.RecommenderSystem.RecommenderSystem import RecommenderSystem
 import pandas as pd
+import numpy as np
 
 # Process the data
 original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
@@ -8,6 +9,29 @@ no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/
 normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
 items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
 all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
+
+
+def calculate_accuracy(list_keywords, true_values, predicted_values):
+    tp = len([x for x in list_keywords if x in predicted_values and x in true_values])
+    tn = len([x for x in list_keywords if x not in predicted_values and x not in true_values])
+    fp = len([x for x in list_keywords if x in predicted_values and x not in true_values])
+    fn = len([x for x in list_keywords if x not in predicted_values and x in true_values])
+
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+
+    return accuracy
+
+
+def make_count_table(user_seen_items, user_seen_keywords, items_table):
+    count_table = pd.DataFrame(0, index=np.arange(1), columns=user_seen_keywords)
+    seen_items = items_table[items_table['pageUrl'].isin(user_seen_items)]
+
+    for index, row in seen_items.iterrows():
+        values = row['keywords']
+        values = [x for x in values if x in user_seen_keywords]
+        count_table.loc[0, values] += 1
+
+    return count_table
 
 
 def prepare_training_testing_data(initial_table, items_table, list_keywords, user_id):
@@ -68,9 +92,13 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
     actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits = \
         prepare_training_testing_data(initial_table, items_table, list_keywords, user_id)
 
+    count_table = make_count_table(actual_seen_items_list, user_actual_seen_keywords, items_table)
+    irrelevant_keywords = count_table.loc[:, (count_table == 1).any(axis=0)].columns.values.tolist()
+
     main = RecommenderSystem()
 
-    final_result_items = main.run_main(initial_table, items_table, list_keywords, user_visits, user_id)
+    final_result_items = main.run_recommender_system(initial_table, items_table, list_keywords, user_visits, user_id,
+                                                     [])
 
     correctly_predicted_items = [x for x in final_result_items if x in actual_seen_items_list]
     indexes = [final_result_items.index(value) for value in correctly_predicted_items]
@@ -78,8 +106,10 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
     count_correct_guessed_items = len([x for x in indexes if x < k])
     count_correct_guessed_keywords = len([x for x in main.predicted_keywords if x in user_actual_seen_keywords])
 
+    accuracy = calculate_accuracy(list_keywords, user_actual_seen_keywords, main.predicted_keywords)
+
     return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords), \
-           len(correctly_predicted_items) / len(final_result_items)
+           len(correctly_predicted_items) / len(final_result_items), accuracy
 
 
 def run_evaluation():
@@ -95,6 +125,7 @@ def run_evaluation():
     precision_items = []
     precision_keywords = []
     precision_items_overall = []
+    accuracy_overall = []
 
     i = 0
     visitor_length = len(returning_visitors)
@@ -105,15 +136,18 @@ def run_evaluation():
         initial_table_to_give = initial_table.copy()
         items_table_to_give = items_table.copy()
         list_keywords_to_give = list_keywords.copy()
-        guessed_items, guessed_keywords, overall_precision = precision_main(initial_table_to_give, items_table_to_give,
-                                                                            list_keywords_to_give, visitor, 70)
+        guessed_items, guessed_keywords, overall_precision, average_accuracy = precision_main(initial_table_to_give,
+                                                                                              items_table_to_give,
+                                                                                              list_keywords_to_give,
+                                                                                              visitor, 70)
         precision_items.append(guessed_items)
         precision_keywords.append(guessed_keywords)
         precision_items_overall.append(overall_precision)
+        accuracy_overall.append(average_accuracy)
         i += 1
         if i % 10 == 0:
             print("Progress Precision:", round((i / visitor_length) * 100, 2), "%")
 
-    return precision_items, precision_keywords, precision_items_overall
+    return precision_items, precision_keywords, precision_items_overall, accuracy_overall
 
-# precision_items, precision_keywords, precision_items_overall = run_evaluation()
+# precision_items, precision_keywords, precision_items_overall, accuracy_overall = run_evaluation()

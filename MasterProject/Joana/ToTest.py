@@ -4,11 +4,11 @@ from MasterProject.NeuralNetwork.NNModel import NNModel
 import pandas as pd
 import numpy as np
 
-url = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
-url_no_trans = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
-url_after_everything = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
-url_items_file = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
-url_to_save = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
+url = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_15mb.json"
+url_no_trans = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_no_transactions_15mb.json"
+url_after_everything = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_everything_15mb.json"
+url_items_file = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_items_15mb.json"
+url_to_save = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_hellermanntyton_15mb.json"
 
 
 def create_and_train_NN(nn_model, training_data, training_keywords):
@@ -27,7 +27,7 @@ def create_and_train_NN(nn_model, training_data, training_keywords):
 
     nn_model.create_model(data_columns, keywords_columns)
 
-    nn_model.train_model(training_data, training_keywords)
+    nn_model.train_model(training_data, training_keywords, graphs=True)
 
 
 main = RecommenderSystem()
@@ -36,7 +36,7 @@ initial_table = pd.read_json(url_to_save).reset_index(drop=True)
 items_table = pd.read_json(url_items_file).reset_index(drop=True)
 
 list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'keywords')
-user_id = '2da0f833-c9a8-41fa-86d5-bb179633b87a'
+user_id = 'e38507e2-fcb3-448c-a52b-02ce50056d58'
 
 # Get previous visits from user with user_id into a table
 user_visits = initial_table[initial_table['visitorId'] == user_id]
