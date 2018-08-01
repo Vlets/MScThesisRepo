@@ -55,22 +55,112 @@ def make_average_precision_graph_hellermanntyton():
     plt.show()
 
 
-def make_average_precision_graph_bloomreach_error_bars():
+def make_precision_graph_bloomreach_items():
     top_k = np.array([5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70])
-    precision_usg_usc_loc = np.array([0.379, 0.24, 0.205, 0.137, 0.117, 0.129, 0.087, 0.078, 0.072, 0.066, 0.061, 0.068,
+    precision_usg_loc = np.array([0.379, 0.24, 0.173, 0.137, 0.116, 0.101, 0.087, 0.078, 0.072, 0.066, 0.061, 0.058,
                                       0.056, 0.052])
-    errors_usg_usc_loc = np.array([0.031, 0.024, 0.043, 0.015, 0.013, 0.025, 0.01, 0.009, 0.009, 0.008, 0.007, 0.013,
+    errors_usg_loc = np.array([0.031, 0.024, 0.019, 0.015, 0.013, 0.012, 0.01, 0.009, 0.009, 0.008, 0.007, 0.007,
                                    0.007, 0.007])
-    precision_loc = np.array([0.383, 0.246, 0.229, 0.139, 0.119, 0.134, 0.093, 0.082, 0.073, 0.068, 0.064, 0.079, 0.057,
+    precision_loc = np.array([0.383, 0.246, 0.179, 0.139, 0.119, 0.102, 0.093, 0.082, 0.073, 0.068, 0.064, 0.06, 0.057,
                               0.054])
-    errors_loc = np.array([0.032, 0.024, 0.046, 0.015, 0.013, 0.025, 0.011, 0.01, 0.008, 0.008, 0.008, 0.016, 0.007,
+    errors_loc = np.array([0.032, 0.024, 0.02, 0.015, 0.013, 0.012, 0.011, 0.01, 0.008, 0.008, 0.008, 0.007, 0.007,
                            0.007])
-    plt.errorbar(top_k, precision_usg_usc_loc, errors_usg_usc_loc, linestyle='--', marker='s', label='USg + USc + Loc',
+    plt.errorbar(top_k, precision_usg_loc, errors_usg_loc, linestyle='--', marker='s', label='USg + Loc',
                  capsize=5, capthick=1.5)
     plt.errorbar(top_k, precision_loc, errors_loc, linestyle='--', marker='o', label='Loc',
-                 capsize=5, capthick=1.5, color='g')
-    plt.title('Average Users Item Interest Prediction - Bloomreach Data Set')
+                 capsize=5, capthick=1.5, color='r')
+    plt.title('Users Item Interest Prediction - Bloomreach Data Set')
     plt.xlabel('Top-K')
     plt.ylabel('Precision')
     plt.legend()
     plt.show()
+
+
+def make_precision_graph_hellermanntyton_items():
+    top_k = np.array([5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70])
+    precision_usg_loc = np.array([0.172, 0.119, 0.086, 0.091, 0.076, 0.057, 0.055, 0.052, 0.047, 0.048, 0.045, 0.04,
+                                      0.038, 0.036])
+    errors_usg_loc = np.array([0.043, 0.037, 0.029, 0.032, 0.025, 0.02, 0.018, 0.021, 0.021, 0.023, 0.02, 0.019,
+                                   0.017, 0.016])
+    precision_loc = np.array([0.181, 0.117, 0.097, 0.088, 0.076, 0.068, 0.061, 0.057, 0.054, 0.052, 0.044, 0.043, 0.04,
+                              0.037])
+    errors_loc = np.array([0.045, 0.028, 0.029, 0.029, 0.025, 0.023, 0.022, 0.021, 0.022, 0.022, 0.018, 0.019, 0.017,
+                           0.016])
+    plt.errorbar(top_k, precision_usg_loc, errors_usg_loc, linestyle='--', marker='s', label='USg + Loc',
+                 capsize=5, capthick=1.5)
+    plt.errorbar(top_k, precision_loc, errors_loc, linestyle='--', marker='o', label='Loc',
+                 capsize=5, capthick=1.5, color='r')
+    plt.title('Users Item Interest Prediction - HellermannTyton Data Set')
+    plt.xlabel('Top-K')
+    plt.ylabel('Precision')
+    plt.legend()
+    plt.show()
+
+
+def make_precision_graph_bloomreach_keywords():
+    fig, ax = plt.subplots(nrows=1, sharex=True)
+    mean_usg_loc = 0.037
+    mean_loc = 0.034
+    stdev_usg_loc = 0.004
+    stdev_loc = 0.004
+    ax.errorbar(mean_usg_loc, np.array([1]), xerr=stdev_usg_loc, fmt='--s', capsize=5, capthick=1.5)
+    ax.errorbar(mean_loc, np.array([2]), xerr=stdev_loc, fmt='--o', color='r', capsize=5, capthick=1.5)
+    ax.set_title('Bloomreach Dataset Keywords Prediction Precision')
+    ax.set_yticks([1, 2])
+    ax.set_yticklabels(['USg\n + Loc', 'Loc'])
+    ax.margins(y=3)
+    ax.set_ylabel('Input Data')
+    ax.set_xlabel('Precision')
+    plt.show()
+
+
+def make_precision_graph_hellermanntyton_keywords():
+    fig, ax = plt.subplots(nrows=1, sharex=True)
+    mean_usg_usc_loc = 0.011
+    mean_loc = 0.01
+    stdev_usg_usc_loc = 0.007
+    stdev_loc = 0.006
+    ax.errorbar(mean_usg_usc_loc, np.array([1]), xerr=stdev_usg_usc_loc, fmt='--s', capsize=5, capthick=1.5)
+    ax.errorbar(mean_loc, np.array([2]), xerr=stdev_loc, fmt='--o', color='r', capsize=5, capthick=1.5)
+    ax.set_title('HellermannTyton Dataset Keywords Prediction Precision')
+    ax.set_yticks([1, 2])
+    ax.set_yticklabels(['USg\n + Loc', 'Loc'])
+    ax.margins(y=3)
+    ax.set_ylabel('Input Data')
+    ax.set_xlabel('Precision')
+    plt.show()
+
+
+def make_accuracy_graph_bloomreach_keywords():
+    fig, ax = plt.subplots(nrows=1, sharex=True)
+    mean_usg_loc = 0.706
+    mean_loc = 0.531
+    stdev_usg_loc = 0.01
+    stdev_loc = 0.015
+    ax.errorbar(mean_usg_loc, np.array([1]), xerr=stdev_usg_loc, fmt='--s', capsize=5, capthick=1.5)
+    ax.errorbar(mean_loc, np.array([2]), xerr=stdev_loc, fmt='--o', color='r', capsize=5, capthick=1.5)
+    ax.set_title('Bloomreach Dataset Keywords Prediction Accuracy')
+    ax.set_yticks([1, 2])
+    ax.set_yticklabels(['USg\n + Loc', 'Loc'])
+    ax.margins(y=3)
+    ax.set_ylabel('Input Data')
+    ax.set_xlabel('Precision')
+    plt.show()
+
+
+def make_accuracy_graph_hellermanntyton_keywords():
+    fig, ax = plt.subplots(nrows=1, sharex=True)
+    mean_usg_usc_loc = 0.471
+    mean_loc = 0.042
+    stdev_usg_usc_loc = 0.223
+    stdev_loc = 0.037
+    ax.errorbar(mean_usg_usc_loc, np.array([1]), xerr=stdev_usg_usc_loc, fmt='--s', capsize=5, capthick=1.5)
+    ax.errorbar(mean_loc, np.array([2]), xerr=stdev_loc, fmt='--o', color='r', capsize=5, capthick=1.5)
+    ax.set_title('HellermannTyton Dataset Keywords Prediction Accuracy')
+    ax.set_yticks([1, 2])
+    ax.set_yticklabels(['USg\n + Loc', 'Loc'])
+    ax.margins(y=3)
+    ax.set_ylabel('Input Data')
+    ax.set_xlabel('Precision')
+    plt.show()
+

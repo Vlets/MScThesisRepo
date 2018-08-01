@@ -130,7 +130,7 @@ def run_evaluation():
     i = 0
     visitor_length = len(returning_visitors)
 
-    print("Top 70")
+    print("Top 5")
 
     for visitor in returning_visitors:
         initial_table_to_give = initial_table.copy()
@@ -139,7 +139,7 @@ def run_evaluation():
         guessed_items, guessed_keywords, overall_precision, average_accuracy = precision_main(initial_table_to_give,
                                                                                               items_table_to_give,
                                                                                               list_keywords_to_give,
-                                                                                              visitor, 70)
+                                                                                              visitor, 5)
         precision_items.append(guessed_items)
         precision_keywords.append(guessed_keywords)
         precision_items_overall.append(overall_precision)

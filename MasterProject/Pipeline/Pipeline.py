@@ -45,7 +45,7 @@ def run_pipeline():
         prepare_training_testing_data(initial_table, items_table, list_keywords, user_id)
 
     count_table = make_count_table(actual_seen_items_list, user_actual_seen_keywords, items_table)
-    irrelevant_keywords = count_table.loc[:, (count_table <= 15 ).any(axis=0)].columns.values.tolist()
+    irrelevant_keywords = count_table.loc[:, (count_table <= 15).any(axis=0)].columns.values.tolist()
 
     # 5th, run the recommender system
     suggested_items = main.run_recommender_system(training_data, items_table, list_keywords, testing_data, user_id,
@@ -60,4 +60,4 @@ def run_pipeline():
 
 
 returned_items, correctly_guessed_items, indexes_of_correctly_guessed_items, correctly_guessed_keywords, \
-    predicted_keywords = run_pipeline()
+   predicted_keywords = run_pipeline()
