@@ -1,5 +1,6 @@
 from MasterProject.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
 from MasterProject.RecommenderSystem.RecommenderSystem import RecommenderSystem
+import random
 import pandas as pd
 import numpy as np
 
@@ -20,6 +21,21 @@ def calculate_accuracy(list_keywords, true_values, predicted_values):
     accuracy = (tp + tn) / (tp + tn + fp + fn)
 
     return accuracy
+
+
+def random_items_prediction_precision(items_table, user_past_visits, actual_seen_items_list, k):
+    list_of_items = items_table.pageUrl.values.tolist()
+    items_already_seen_table, items_already_seen_list = RecommenderSystem.get_seen_items_table_list(user_past_visits,
+                                                                                                    items_table)
+    list_of_items_to_suggest = [x for x in list_of_items if x not in items_already_seen_list]
+    random.shuffle(list_of_items_to_suggest)
+
+    random_correctly_predicted_items = [x for x in list_of_items_to_suggest if x in actual_seen_items_list]
+    indexes_random = [list_of_items_to_suggest.index(value) for value in random_correctly_predicted_items]
+
+    count_correct_random_guessed_items = len([x for x in indexes_random if x < k])
+
+    return count_correct_random_guessed_items / k
 
 
 def make_count_table(user_seen_items, user_seen_keywords, items_table):
@@ -59,6 +75,7 @@ def prepare_training_testing_data(initial_table, items_table, list_keywords, use
     index_to_keep_in_initial_table = user_indexes_in_initial_table[0]
 
     # Drop the visit to keep in initial_table from user_visits table
+    user_past_visits = user_visits[user_visits.index == index_to_keep_in_initial_table]
     user_visits = user_visits.drop(index_to_keep_in_initial_table)
 
     # Remove the index of visit to keep from list of indexes of user in initial_table
@@ -68,6 +85,7 @@ def prepare_training_testing_data(initial_table, items_table, list_keywords, use
     actual_seen_items_table, actual_seen_items_list = RecommenderSystem.get_seen_items_table_list(user_visits,
                                                                                                   items_table)
     user_actual_seen_keywords = PreprocessingData.create_list_all_possible_values(user_visits, 'keywords')
+    user_actual_output = user_visits[list_keywords]
 
     # Drop the unwanted visits from initial_table
     initial_table = initial_table.drop(user_indexes_in_initial_table).reset_index(drop=True)
@@ -75,7 +93,36 @@ def prepare_training_testing_data(initial_table, items_table, list_keywords, use
     user_visits = user_visits.drop(columns=list_keywords)
     user_visits = user_visits.drop(columns=['keywords', 'transactionPath', 'visitorId'])
 
-    return actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits
+    return actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_actual_output, \
+           user_past_visits
+
+
+def random_baseline(testing_x, testing_y):
+    training_rows, training_columns = testing_y.shape
+    testing_rows, testing_columns = testing_x.shape
+    binary_maximum_value = [1] * training_columns
+    string_binary_value = ''.join(str(e) for e in binary_maximum_value)
+    maximum_value = int(string_binary_value, 2)
+    predictions = []
+    i = 0
+
+    while i < testing_rows:
+        random_value = random.randint(0, maximum_value)
+        string_binary_random_value = "{0:b}".format(random_value)
+        list_string_binary_random_value = []
+        list_string_binary_random_value[:0] = string_binary_random_value
+        list_integer_binary_random_value = [int(x) for x in list_string_binary_random_value]
+        size_binary_random_value = len(list_integer_binary_random_value)
+        if size_binary_random_value != training_columns:
+            difference = training_columns - size_binary_random_value
+            zeros = [0] * difference
+            zeros.extend(list_integer_binary_random_value)
+            list_integer_binary_random_value = zeros
+
+        predictions.append(list_integer_binary_random_value)
+        i += 1
+
+    return predictions
 
 
 def precision_main(initial_table, items_table, list_keywords, user_id, k):
@@ -89,16 +136,15 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
     :param k: Top k items to check the precision
     :return: The precision of predicting the items and precision of predicting the keywords
     """
-    actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits = \
-        prepare_training_testing_data(initial_table, items_table, list_keywords, user_id)
+    actual_seen_items_list, initial_table, user_actual_seen_keywords, user_visits, user_actual_output, user_past_visits \
+        = prepare_training_testing_data(initial_table, items_table, list_keywords, user_id)
 
-    count_table = make_count_table(actual_seen_items_list, user_actual_seen_keywords, items_table)
-    irrelevant_keywords = count_table.loc[:, (count_table == 1).any(axis=0)].columns.values.tolist()
+    # count_table = make_count_table(actual_seen_items_list, user_actual_seen_keywords, items_table)
+    # irrelevant_keywords = count_table.loc[:, (count_table == 1).any(axis=0)].columns.values.tolist()
 
     main = RecommenderSystem()
 
-    final_result_items = main.run_recommender_system(initial_table, items_table, list_keywords, user_visits, user_id,
-                                                     [])
+    final_result_items = main.run_recommender_system(initial_table, items_table, list_keywords, user_visits, user_id)
 
     correctly_predicted_items = [x for x in final_result_items if x in actual_seen_items_list]
     indexes = [final_result_items.index(value) for value in correctly_predicted_items]
@@ -108,14 +154,34 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
 
     accuracy = calculate_accuracy(list_keywords, user_actual_seen_keywords, main.predicted_keywords)
 
+    ####################################################################################################################
+    # Predict items with randomly predicted keywords
+    testing_data = user_visits.iloc[:, :].values
+    testing_keywords = user_actual_output.iloc[:, :].values
+    test_x = np.array([testing_data[0].tolist()])
+    test_y = np.array([testing_keywords[0].tolist()])
+
+    random_kewyords_prediction = random_baseline(test_x, test_y)
+    random_items_prediction = main.suggest_items(initial_table, items_table, list_keywords, random_kewyords_prediction,
+                                                 user_id)
+    random_correctly_predicted_items = [x for x in random_items_prediction if x in actual_seen_items_list]
+    indexes_random = [random_items_prediction.index(value) for value in random_correctly_predicted_items]
+
+    count_correct_random_guessed_items = len([x for x in indexes_random if x < k])
+
+    ####################################################################################################################
+    # Predict items randomly
+    items_prediction_random = random_items_prediction_precision(items_table, user_past_visits, actual_seen_items_list,
+                                                                k)
+
     return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords), \
-           len(correctly_predicted_items) / len(final_result_items), accuracy
+           len(correctly_predicted_items) / len(final_result_items), accuracy, count_correct_random_guessed_items / k, \
+           items_prediction_random
 
 
 def run_evaluation():
     initial_table = pd.read_json(all_data_processed_file_path).reset_index(drop=True)
     items_table = pd.read_json(items_file_path).reset_index(drop=True)
-
     list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'keywords')
 
     groups = initial_table.groupby('visitorId').count()
@@ -126,28 +192,35 @@ def run_evaluation():
     precision_keywords = []
     precision_items_overall = []
     accuracy_overall = []
+    random_baseline_precision_keywords_items = []
+    random_baseline_precision_items = []
 
     i = 0
     visitor_length = len(returning_visitors)
 
-    print("Top 5")
+    print("Top 10")
 
     for visitor in returning_visitors:
         initial_table_to_give = initial_table.copy()
         items_table_to_give = items_table.copy()
         list_keywords_to_give = list_keywords.copy()
-        guessed_items, guessed_keywords, overall_precision, average_accuracy = precision_main(initial_table_to_give,
-                                                                                              items_table_to_give,
-                                                                                              list_keywords_to_give,
-                                                                                              visitor, 5)
+        guessed_items, guessed_keywords, overall_precision, average_accuracy, random_keywords_items_prediction, \
+        random_items_prediction = precision_main(initial_table_to_give, items_table_to_give, list_keywords_to_give,
+                                                 visitor, 10)
+
         precision_items.append(guessed_items)
         precision_keywords.append(guessed_keywords)
         precision_items_overall.append(overall_precision)
         accuracy_overall.append(average_accuracy)
+        random_baseline_precision_keywords_items.append(random_keywords_items_prediction)
+        random_baseline_precision_items.append(random_items_prediction)
         i += 1
         if i % 10 == 0:
             print("Progress Precision:", round((i / visitor_length) * 100, 2), "%")
 
-    return precision_items, precision_keywords, precision_items_overall, accuracy_overall
+    return precision_items, precision_keywords, precision_items_overall, accuracy_overall, \
+           random_baseline_precision_keywords_items, random_baseline_precision_items
 
-# precision_items, precision_keywords, precision_items_overall, accuracy_overall = run_evaluation()
+
+# precision_items, precision_keywords, precision_items_overall, accuracy_overall, random_keywords_items, random_items = \
+#    run_evaluation()

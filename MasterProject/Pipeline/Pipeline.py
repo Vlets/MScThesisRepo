@@ -1,5 +1,5 @@
 from MasterProject.PreprocessingAlgorithms.PreprocessingData import PreprocessingData
-from MasterProject.Evaluation.PrecisionEvaluation import prepare_training_testing_data
+from MasterProject.Evaluation.Evaluation import prepare_training_testing_data
 from MasterProject.RecommenderSystem.RecommenderSystem import RecommenderSystem
 import pandas as pd
 import numpy as np
@@ -41,15 +41,14 @@ def run_pipeline():
     user_id = '2da0f833-c9a8-41fa-86d5-bb179633b87a'
     # user_id = 'e38507e2-fcb3-448c-a52b-02ce50056d58'
 
-    actual_seen_items_list, training_data, user_actual_seen_keywords, testing_data = \
-        prepare_training_testing_data(initial_table, items_table, list_keywords, user_id)
+    actual_seen_items_list, training_data, user_actual_seen_keywords, testing_data, user_actual_output, user_past_visits \
+        = prepare_training_testing_data(initial_table, items_table, list_keywords, user_id)
 
-    count_table = make_count_table(actual_seen_items_list, user_actual_seen_keywords, items_table)
-    irrelevant_keywords = count_table.loc[:, (count_table <= 15).any(axis=0)].columns.values.tolist()
+    # count_table = make_count_table(actual_seen_items_list, user_actual_seen_keywords, items_table)
+    # irrelevant_keywords = count_table.loc[:, (count_table <= 15).any(axis=0)].columns.values.tolist()
 
     # 5th, run the recommender system
-    suggested_items = main.run_recommender_system(training_data, items_table, list_keywords, testing_data, user_id,
-                                                  [])
+    suggested_items = main.run_recommender_system(training_data, items_table, list_keywords, testing_data, user_id)
 
     correctly_predicted_items = [x for x in suggested_items if x in actual_seen_items_list]
     indexes_of_correctly_guessed_items = [suggested_items.index(value) for value in correctly_predicted_items]

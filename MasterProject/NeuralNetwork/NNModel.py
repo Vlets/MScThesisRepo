@@ -123,13 +123,14 @@ class NNModel:
         :return: A Neural Network model
         """
 
-        precision = self.as_keras_metric(tf.metrics.precision)
-
         model = Sequential()
         model.add(Dense(64, activation='relu', input_shape=(length_x,)))
         model.add(Dense(16, activation='relu'))
         model.add(Dense(length_y, activation='sigmoid'))
-        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=[keras_metrics.precision()])
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=[
+            keras_metrics.precision(),
+            'accuracy'
+        ])
         self.model = model
 
         return model
@@ -146,20 +147,21 @@ class NNModel:
         # Shuffle and split
         # X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         if graphs:
-            # early_stopping_accuracy = EarlyStopping(monitor='val_acc', min_delta=0.00001, patience=2, verbose=0,
-            #                                         mode='auto')
+            early_stopping_accuracy = EarlyStopping(monitor='val_acc', min_delta=0.00001, patience=2, verbose=0,
+                                                    mode='auto')
             early_stopping_precision = EarlyStopping(monitor='val_precision', min_delta=0.00001, patience=2, verbose=0,
                                                      mode='max')  # FOR PRECISION
             history = self.model.fit(X, Y, epochs=20, batch_size=512, shuffle=True, validation_split=0.2,
                                      callbacks=[
-                                         # early_stopping_accuracy,
-                                         early_stopping_precision])
+                                         early_stopping_accuracy,
+                                         early_stopping_precision
+                                     ])
             NNModel.shows_graphs(history)
 
         else:
-            train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.2)
-            self.model.fit(train_x, train_y, epochs=9, batch_size=512, verbose=0, shuffle=True)
-            self.calculate_threshold(test_x, test_y)
+            # train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.2)
+            self.model.fit(X, Y, epochs=9, batch_size=512, verbose=0, shuffle=True)
+            # self.calculate_threshold(test_x, test_y)
 
     def predict_values(self, input_x):
         """
@@ -172,10 +174,15 @@ class NNModel:
         # prediction[prediction < 0.45] = 0
         # prediction[prediction >= 0.48] = 1  # --> Hellermann PREC
         # prediction[prediction < 0.48] = 0
-        # prediction[prediction >= 0.48] = 1  # --> Bloomreach prec + acc
-        # prediction[prediction < 0.48] = 0
-        prediction[prediction >= self.threshold] = 1  # --> Bloomreach prec
-        prediction[prediction < self.threshold] = 0
+        # prediction[prediction >= 0.37] = 1  # --> Bloomreach prec + acc
+        # prediction[prediction < 0.37] = 0
+        # prediction[prediction >= 0.35] = 1  # --> Bloomreach prec
+        # prediction[prediction < 0.35] = 0
+        top_values = sorted(prediction, reverse=True)[:3]
+        for val in top_values:
+            prediction[prediction == val] = 1
+
+        prediction[~(prediction == 1)] = 0
 
         return prediction
 
@@ -198,7 +205,7 @@ class NNModel:
         predictions = self.model.predict(test_x)
         predictions_as_table = pd.DataFrame(predictions)
         actual_output = pd.DataFrame(test_y)
-        result =[]
+        result = []
 
         for index, row in actual_output.iterrows():
             t = actual_output.loc[index, (actual_output != 0).any(axis=0)]

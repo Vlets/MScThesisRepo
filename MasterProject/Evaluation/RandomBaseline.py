@@ -8,11 +8,11 @@ from random import randint
 import pandas as pd
 import numpy as np
 
-original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
-no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
-normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
-items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
-all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
+original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_15mb.json"
+no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_no_transactions_15mb.json"
+normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_everything_15mb.json"
+items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_items_15mb.json"
+all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_hellermanntyton_15mb.json"
 
 
 def calculate_precision(predictions, test_data):
@@ -61,6 +61,25 @@ def random_baseline(testing_x, testing_y):
     return predictions
 
 
+def calculate_threshold(model, test_x, test_y):
+    predictions = model.predict(test_x)
+    predictions_as_table = pd.DataFrame(predictions)
+    actual_output = pd.DataFrame(test_y)
+    result = []
+
+    for index, row in actual_output.iterrows():
+        t = actual_output.loc[index, (actual_output != 0).any(axis=0)]
+        p = predictions_as_table.loc[index]
+        inter = t[t == 1]
+        value_indexes = inter.index.values.tolist()
+        prediction_values = p[value_indexes].values.tolist()
+        average = sum(prediction_values)/len(prediction_values)
+        result.append(average)
+
+    threshold = float("{:1.2f}".format(sum(result)/len(result)))
+    return threshold
+
+
 def run():
     initial_table = pd.read_json(all_data_processed_file_path).reset_index(drop=True)
     items_table = pd.read_json(items_file_path).reset_index(drop=True)
@@ -81,7 +100,8 @@ loss, metric = nn_model.model.evaluate(test_x, test_y)
 predictions = random_baseline(test_x, test_y)
 metric_random = nn_model.calculate_accuracy(predictions, test_y)"""
 
-    kf = KFold(n_splits=10)
+    kf = KFold(n_splits=7, shuffle=True)
+    threshold = []
     scores = []
     for train_index, test_index in kf.split(data):
         print("TRAIN:", train_index, "TEST:", test_index)
@@ -90,12 +110,21 @@ metric_random = nn_model.calculate_accuracy(predictions, test_y)"""
         train_y, test_y = keywords[train_index], keywords[test_index]
         early_stopping_accuracy = EarlyStopping(monitor='val_acc', min_delta=0.00001, patience=2, verbose=0, mode='auto')
         early_stopping_precision = EarlyStopping(monitor='val_precision', min_delta=0.00001, patience=2, verbose=0, mode='max')
-        model.fit(train_x, train_y, epochs=20, batch_size=512, shuffle=True, validation_split=0.2,
-                  callbacks=[early_stopping_accuracy, early_stopping_precision])
+        model.fit(train_x, train_y, epochs=20, batch_size=512, validation_split=0.2,
+                  callbacks=[
+                      early_stopping_precision,
+                      early_stopping_accuracy
+                  ])
         loss, metric_precision, metric_accuracy = model.evaluate(test_x, test_y)
-        predictions = random_baseline(test_x, test_y)
-        random_precision = calculate_precision(predictions, test_y)
-        random_accuracy = nn_model.calculate_accuracy(predictions, test_y)
-        scores.append((metric_precision, metric_accuracy, random_precision, random_accuracy))
+        model_threshold = calculate_threshold(model, test_x, test_y)
+        random_predictions = random_baseline(test_x, test_y)
+        random_precision = calculate_precision(random_predictions, test_y)
+        random_accuracy = nn_model.calculate_accuracy(random_predictions, test_y)
+        scores.append((metric_precision,
+                       metric_accuracy,
+                       random_precision,
+                       random_accuracy
+                       ))
+        threshold.append(model_threshold)
 
-    return scores
+    return scores, threshold
