@@ -160,7 +160,7 @@ class NNModel:
 
         else:
             # train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.2)
-            self.model.fit(X, Y, epochs=9, batch_size=512, verbose=0, shuffle=True)
+            self.model.fit(X, Y, epochs=12, batch_size=512, verbose=0, shuffle=True)
             # self.calculate_threshold(test_x, test_y)
 
     def predict_values(self, input_x):
@@ -170,15 +170,7 @@ class NNModel:
         :return: The prediction made with binary values
         """
         prediction = self.model.predict(input_x)
-        # prediction[prediction >= 0.45] = 1  # --> Hellermann prec + acc
-        # prediction[prediction < 0.45] = 0
-        # prediction[prediction >= 0.48] = 1  # --> Hellermann PREC
-        # prediction[prediction < 0.48] = 0
-        # prediction[prediction >= 0.37] = 1  # --> Bloomreach prec + acc
-        # prediction[prediction < 0.37] = 0
-        # prediction[prediction >= 0.35] = 1  # --> Bloomreach prec
-        # prediction[prediction < 0.35] = 0
-        top_values = sorted(prediction, reverse=True)[:3]
+        top_values = sorted(prediction[0].tolist(), reverse=True)[:150]
         for val in top_values:
             prediction[prediction == val] = 1
 

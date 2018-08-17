@@ -4,11 +4,11 @@ from MasterProject.RecommenderSystem.RecommenderSystem import RecommenderSystem
 import pandas as pd
 import numpy as np
 
-original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
-no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
-normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
-items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
-all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
+original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_15mb.json"
+no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_no_transactions_15mb.json"
+normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_everything_15mb.json"
+items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_items_15mb.json"
+all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_hellermanntyton_15mb.json"
 
 
 def make_count_table(user_seen_items, user_seen_keywords, items_table):
@@ -38,8 +38,8 @@ def run_pipeline():
     list_keywords = PreprocessingData.create_list_all_possible_values(items_table, 'keywords')
 
     # 4th, prepare the training and testing data
-    user_id = '2da0f833-c9a8-41fa-86d5-bb179633b87a'
-    # user_id = 'e38507e2-fcb3-448c-a52b-02ce50056d58'
+    # user_id = '2da0f833-c9a8-41fa-86d5-bb179633b87a'
+    user_id = 'e38507e2-fcb3-448c-a52b-02ce50056d58'
 
     actual_seen_items_list, training_data, user_actual_seen_keywords, testing_data, user_actual_output, user_past_visits \
         = prepare_training_testing_data(initial_table, items_table, list_keywords, user_id)

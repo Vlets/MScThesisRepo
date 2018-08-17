@@ -43,7 +43,7 @@ class JsonProcessor:
     @staticmethod
     def remove_homepage_and_stringify(data_frame):
         transactions = [str(x) for x in data_frame['transactionPath'] if len(x) < 2]
-        keep_values = ['hst:pages/documentation', 'hst:pages/trail', 'hst:pages/labs-detail']
+        keep_values = ['hst:pages/productpage']
         result = data_frame[
             (data_frame.astype(str)['transactionPath'].isin(transactions)) & (~data_frame['pageId'].isin(keep_values))]
         indexes = result.index.values.tolist()

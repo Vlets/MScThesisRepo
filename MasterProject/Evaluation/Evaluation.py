@@ -5,11 +5,11 @@ import pandas as pd
 import numpy as np
 
 # Process the data
-original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_20mb.json"
-no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_no_transactions_20mb.json"
-normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_everything_20mb.json"
-items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/bloomreach_targeting_items_20mb.json"
-all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_bloomreach_targeting_20mb.json"
+original_data_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_15mb.json"
+no_transactions_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_no_transactions_15mb.json"
+normalized_personas_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_everything_15mb.json"
+items_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/hellermanntyton_items_15mb.json"
+all_data_processed_file_path = "/Users/Joana/Documents/GitHub/scikitLiterallyLearn/MasterProject/FilesToTest/processed_hellermanntyton_15mb.json"
 
 
 def calculate_accuracy(list_keywords, true_values, predicted_values):
@@ -98,28 +98,21 @@ def prepare_training_testing_data(initial_table, items_table, list_keywords, use
 
 
 def random_baseline(testing_x, testing_y):
-    training_rows, training_columns = testing_y.shape
-    testing_rows, testing_columns = testing_x.shape
-    binary_maximum_value = [1] * training_columns
-    string_binary_value = ''.join(str(e) for e in binary_maximum_value)
-    maximum_value = int(string_binary_value, 2)
+    output_number_rows, output_number_columns = testing_y.shape
+    input_number_rows, input_number_columns = testing_x.shape
+    only_zeros = [0] * output_number_columns
+    top_k = 150
     predictions = []
     i = 0
 
-    while i < testing_rows:
-        random_value = random.randint(0, maximum_value)
-        string_binary_random_value = "{0:b}".format(random_value)
-        list_string_binary_random_value = []
-        list_string_binary_random_value[:0] = string_binary_random_value
-        list_integer_binary_random_value = [int(x) for x in list_string_binary_random_value]
-        size_binary_random_value = len(list_integer_binary_random_value)
-        if size_binary_random_value != training_columns:
-            difference = training_columns - size_binary_random_value
-            zeros = [0] * difference
-            zeros.extend(list_integer_binary_random_value)
-            list_integer_binary_random_value = zeros
+    while i < input_number_rows:
+        list_of_indexes = [x for x in range(0, output_number_columns)]
+        random.shuffle(list_of_indexes)
+        indexes_to_change = list_of_indexes[:top_k]
+        for index in indexes_to_change:
+            only_zeros[index] = 1
 
-        predictions.append(list_integer_binary_random_value)
+        predictions.append(only_zeros)
         i += 1
 
     return predictions
@@ -161,13 +154,16 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
     test_x = np.array([testing_data[0].tolist()])
     test_y = np.array([testing_keywords[0].tolist()])
 
-    random_kewyords_prediction = random_baseline(test_x, test_y)
-    random_items_prediction = main.suggest_items(initial_table, items_table, list_keywords, random_kewyords_prediction,
+    random_keywords_prediction = random_baseline(test_x, test_y)
+    random_items_prediction = main.suggest_items(initial_table, items_table, list_keywords, random_keywords_prediction,
                                                  user_id)
     random_correctly_predicted_items = [x for x in random_items_prediction if x in actual_seen_items_list]
     indexes_random = [random_items_prediction.index(value) for value in random_correctly_predicted_items]
 
     count_correct_random_guessed_items = len([x for x in indexes_random if x < k])
+    count_correct_random_guessed_keywords = len([x for x in random_keywords_prediction if x in user_actual_seen_keywords])
+
+    accuracy_keywords_random = calculate_accuracy(list_keywords, user_actual_seen_keywords, random_keywords_prediction)
 
     ####################################################################################################################
     # Predict items randomly
@@ -176,7 +172,8 @@ def precision_main(initial_table, items_table, list_keywords, user_id, k):
 
     return count_correct_guessed_items / k, count_correct_guessed_keywords / len(main.predicted_keywords), \
            len(correctly_predicted_items) / len(final_result_items), accuracy, count_correct_random_guessed_items / k, \
-           items_prediction_random
+           items_prediction_random, accuracy_keywords_random, \
+           count_correct_random_guessed_keywords / len(random_keywords_prediction)
 
 
 def run_evaluation():
@@ -194,19 +191,21 @@ def run_evaluation():
     accuracy_overall = []
     random_baseline_precision_keywords_items = []
     random_baseline_precision_items = []
+    random_baseline_keywords_precision = []
+    random_baseline_keywords_accuracy = []
 
     i = 0
     visitor_length = len(returning_visitors)
 
-    print("Top 10")
+    print("Top 3")
 
     for visitor in returning_visitors:
         initial_table_to_give = initial_table.copy()
         items_table_to_give = items_table.copy()
         list_keywords_to_give = list_keywords.copy()
         guessed_items, guessed_keywords, overall_precision, average_accuracy, random_keywords_items_prediction, \
-        random_items_prediction = precision_main(initial_table_to_give, items_table_to_give, list_keywords_to_give,
-                                                 visitor, 10)
+        random_items_prediction, random_keywords_accuracy, random_keywords_precision \
+            = precision_main(initial_table_to_give, items_table_to_give, list_keywords_to_give, visitor, 3)
 
         precision_items.append(guessed_items)
         precision_keywords.append(guessed_keywords)
@@ -214,13 +213,16 @@ def run_evaluation():
         accuracy_overall.append(average_accuracy)
         random_baseline_precision_keywords_items.append(random_keywords_items_prediction)
         random_baseline_precision_items.append(random_items_prediction)
+        random_baseline_keywords_precision.append(random_keywords_precision)
+        random_baseline_keywords_accuracy.append(random_keywords_accuracy)
         i += 1
         if i % 10 == 0:
             print("Progress Precision:", round((i / visitor_length) * 100, 2), "%")
 
     return precision_items, precision_keywords, precision_items_overall, accuracy_overall, \
-           random_baseline_precision_keywords_items, random_baseline_precision_items
+           random_baseline_precision_keywords_items, random_baseline_precision_items, \
+           random_baseline_keywords_precision, random_baseline_keywords_accuracy
 
 
-# precision_items, precision_keywords, precision_items_overall, accuracy_overall, random_keywords_items, random_items = \
-#    run_evaluation()
+# precision_items, precision_keywords, precision_items_overall, accuracy_overall, random_keywords_items, random_items, \
+# random_keywords_precision, random_keywords_accuracy = run_evaluation()
